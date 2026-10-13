@@ -1,0 +1,13 @@
+{
+  "name": "HoneyChain Dev Environment",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {},
+  "postCreateCommand": "pip install -r requirements.txt",
+  "forwardPorts": [5000],
+  "portsAttributes": {
+    "5000": {
+      "label": "HoneyChain Web Portal",
+      "onAutoForward": "openPreview"
+    }
+  }
+}
