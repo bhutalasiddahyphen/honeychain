@@ -1,0 +1,32 @@
+{
+  "name": "HoneyChain – Blockchain Honey Traceability",
+  "short_name": "HoneyChain",
+  "start_url": "/?source=pwa",
+  "id": "honeychain-traceability-pwa",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0f19",
+  "theme_color": "#f59e0b",
+  "description": "Immutable 5-block honey supply chain ledger with cryptographic QR verification.",
+  "categories": ["business", "food", "utilities"],
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
