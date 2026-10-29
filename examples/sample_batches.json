@@ -1,0 +1,48 @@
+{
+  "apiary_stage_example": {
+    "batch_id": "HC-2026-EXAMPLE1",
+    "product_name": "High Mountain Raw Linden Honey",
+    "floral_source": "Tilia cordata (Littleleaf Linden Blossom)",
+    "apiary_name": "Alpine Crest Apiary Co.",
+    "beekeeper_name": "Johann Schmidt",
+    "origin_location": "Bavarian Alpine Valley, Elevation 1,420m",
+    "harvest_date": "2026-10-28",
+    "comb_type": "Pure Capped Comb",
+    "extraction_method": "Unheated Cold Centrifugation",
+    "quantity_kg": 350.0,
+    "notes": "First autumn harvest, unheated raw extraction."
+  },
+  "laboratory_stage_example": {
+    "batch_id": "HC-2026-EXAMPLE1",
+    "lab_name": "Eurofins Food Purity Analytics",
+    "inspector_name": "Dr. Clara Weber",
+    "certificate_no": "CERT-EU-2026-8812",
+    "purity_score": 99.85,
+    "moisture_content": 16.2,
+    "nmr_profile": "100% Pure Raw Honey - No C4/C3 Exogenous Sugars Detected",
+    "hmf_level": 3.4,
+    "lab_test_date": "2026-10-29",
+    "digital_signature": "SIG-SHA256:4C8F1E99A04B21F773AA19028CEF",
+    "signing_key_id": "KEY-LAB-EUROFINS-2026"
+  },
+  "packaging_stage_example": {
+    "batch_id": "HC-2026-EXAMPLE1",
+    "packaging_plant": "CleanPack Artisan Bottling Facility",
+    "packaging_supervisor": "Markus Vance",
+    "jar_format": "500g Hexagonal Embossed Glass Jar",
+    "net_weight": "500g (± 2g)",
+    "tamper_seal_id": "SEAL-CP-2026-0814",
+    "lot_number": "LOT-2026-EU-42",
+    "packaging_date": "2026-10-30"
+  },
+  "retail_stage_example": {
+    "batch_id": "HC-2026-EXAMPLE1",
+    "seller_name": "Artisan Gourmet Food Hall",
+    "store_location": "Maximilianstrasse 18, Munich, Germany",
+    "license_no": "LIC-FOOD-DE-99410",
+    "sale_price": "€24.50",
+    "shelf_arrival_date": "2026-11-01",
+    "retail_status": "On Shelf & Authenticated"
+  }
+}
+

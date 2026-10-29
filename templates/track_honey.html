@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Track Honey{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-route"></i> Track Honey Journey</h1>
+    <p class="page-subtitle">Trace complete supply-chain provenance: Beekeeper &rarr; Laboratory &rarr; Packer &rarr;
+      Seller</p>
+  </div>
+</div>
+
+<!-- Search Bar -->
+<div class="honey-card" style="padding: 20px 24px; margin-bottom: 24px;">
+  <form action="{{ url_for('track_honey') }}" method="GET"
+    style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 260px;">
+      <input type="text" name="batch_id" class="form-input" placeholder="Enter Honey Batch ID..."
+        value="{{ active_batch_id }}" required>
+    </div>
+    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 24px;">
+      <i class="fa-solid fa-magnifying-glass"></i> Track Journey
+    </button>
+  </form>
+
+  {% if batches %}
+  <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.85rem;">
+    <span style="color: var(--text-muted); font-weight: 600;">Quick Batches:</span>
+    {% for b in batches[:5] %}
+    <a href="{{ url_for('track_honey', batch_id=b.batch_id) }}" class="badge badge-gold" style="text-decoration: none;">
+      {{ b.batch_id }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+{% if batch %}
+<!-- Batch Overview Card -->
+<div class="honey-card" style="background: linear-gradient(135deg, var(--white) 0%, var(--cream-50) 100%);">
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <span class="badge badge-gold" style="margin-bottom: 8px;">
+        <i class="fa-solid fa-barcode"></i> BATCH ID: {{ batch.batch_id }}
+      </span>
+      <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--brown-900);">
+        {{ batch.product_name }}
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        <i class="fa-solid fa-seedling" style="color: var(--gold-600);"></i> {{ batch.floral_source }} &bull;
+        <i class="fa-solid fa-location-dot" style="color: var(--gold-600);"></i> {{ batch.origin_location }}
+      </p>
+    </div>
+
+    <div style="text-align: right;">
+      <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Lifecycle
+        Progress</div>
+      <div style="margin-top: 4px;">
+        {% if batch.stage_num == 1 %}
+        <span class="badge badge-stage-1" style="font-size: 0.88rem; padding: 6px 14px;"><i
+            class="fa-solid fa-seedling"></i> Step 1: Apiary Harvest</span>
+        {% elif batch.stage_num == 2 %}
+        <span class="badge badge-stage-2" style="font-size: 0.88rem; padding: 6px 14px;"><i
+            class="fa-solid fa-flask"></i> Step 2: Lab Certified</span>
+        {% elif batch.stage_num == 3 %}
+        <span class="badge badge-stage-3" style="font-size: 0.88rem; padding: 6px 14px;"><i class="fa-solid fa-box"></i>
+          Step 3: Sealed &amp; Packaged</span>
+        {% elif batch.stage_num >= 4 %}
+        <span class="badge badge-stage-4" style="font-size: 0.88rem; padding: 6px 14px;"><i
+            class="fa-solid fa-shop"></i> Step 4: Retail Shelf Authenticated</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4-Stage Blockchain Honey Timeline: Beekeeper -> Laboratory -> Packer -> Seller -->
+<div class="honey-timeline">
+  <!-- STAGE 1: BEEKEEPER -->
+  <div class="timeline-step">
+    <div class="timeline-node {% if batch.stage_num >= 1 %}completed{% endif %}">
+      <i class="fa-solid fa-seedling"></i>
+    </div>
+    <div class="timeline-content">
+      <div class="timeline-header">
+        <div class="timeline-title">Stage 1: Beekeeper Harvest (Block 1)</div>
+        <span class="badge badge-stage-1"><i class="fa-solid fa-check"></i> Sealed in Blockchain</span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Raw floral comb harvested and recorded at source apiary with geographic GPS origin.
+      </p>
+      <div class="timeline-grid">
+        <div class="timeline-field">
+          <span class="field-label">Producing Apiary</span>
+          <span class="field-value">{{ batch.apiary_name }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Master Beekeeper</span>
+          <span class="field-value">{{ batch.beekeeper_name }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Harvest Date</span>
+          <span class="field-value">{{ batch.harvest_date }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Extraction Method</span>
+          <span class="field-value">{{ batch.extraction_method or 'Cold Centrifugation' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 2: LABORATORY TESTING -->
+  <div class="timeline-step">
+    <div class="timeline-node {% if batch.stage_num >= 2 %}completed{% endif %}">
+      <i class="fa-solid fa-flask-vial"></i>
+    </div>
+    <div class="timeline-content">
+      <div class="timeline-header">
+        <div class="timeline-title">Stage 2: Laboratory Purity Test (Block 2)</div>
+        {% if batch.stage_num >= 2 %}
+        <span class="badge badge-stage-2"><i class="fa-solid fa-check"></i> {{ batch.purity_score }}% Certified
+          Pure</span>
+        {% else %}
+        <span class="badge" style="background: var(--slate-100); color: var(--slate-600);"><i
+            class="fa-solid fa-clock"></i> Pending Lab Testing</span>
+        {% endif %}
+      </div>
+      {% if batch.stage_num >= 2 %}
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Scientific Nuclear Magnetic Resonance (NMR) &amp; moisture analysis verified by accredited food testing
+        facility.
+      </p>
+      <div class="timeline-grid">
+        <div class="timeline-field">
+          <span class="field-label">Accredited Laboratory</span>
+          <span class="field-value">{{ batch.lab_name or 'Pending' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Chemist Inspector</span>
+          <span class="field-value">{{ batch.inspector_name or 'Pending' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Certificate No.</span>
+          <span class="field-value code-hash">{{ batch.certificate_no or 'N/A' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Moisture Content</span>
+          <span class="field-value">{{ batch.moisture_content }}% (Std &lt; 20%)</span>
+        </div>
+      </div>
+      {% else %}
+      <p style="font-size: 0.88rem; color: var(--text-muted); font-style: italic;">
+        Awaiting inspection from an accredited laboratory. Go to "Laboratory Testing" in the menu to record test
+        results.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STAGE 3: PACKER -->
+  <div class="timeline-step">
+    <div class="timeline-node {% if batch.stage_num >= 3 %}completed{% endif %}">
+      <i class="fa-solid fa-box-open"></i>
+    </div>
+    <div class="timeline-content">
+      <div class="timeline-header">
+        <div class="timeline-title">Stage 3: Honey Packaging &amp; Sealing (Block 3)</div>
+        {% if batch.stage_num >= 3 %}
+        <span class="badge badge-stage-3"><i class="fa-solid fa-check"></i> Sealed in Food-Grade Glass</span>
+        {% else %}
+        <span class="badge" style="background: var(--slate-100); color: var(--slate-600);"><i
+            class="fa-solid fa-clock"></i> Pending Bottling</span>
+        {% endif %}
+      </div>
+      {% if batch.stage_num >= 3 %}
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Sealed under certified food packaging standards with immutable cryptographic tamper seal.
+      </p>
+      <div class="timeline-grid">
+        <div class="timeline-field">
+          <span class="field-label">Packaging Facility</span>
+          <span class="field-value">{{ batch.packaging_plant or 'Pending' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Container Format</span>
+          <span class="field-value">{{ batch.jar_format or 'Standard Jar' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Tamper Seal ID</span>
+          <span class="field-value code-hash">{{ batch.tamper_seal_id or 'PENDING' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Lot Number</span>
+          <span class="field-value">{{ batch.lot_number or 'N/A' }}</span>
+        </div>
+      </div>
+      {% else %}
+      <p style="font-size: 0.88rem; color: var(--text-muted); font-style: italic;">
+        Batch is ready for bottling and tamper sealing. Go to "Packer Management" in the menu to record packaging.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STAGE 4: SELLER -->
+  <div class="timeline-step">
+    <div class="timeline-node {% if batch.stage_num >= 4 %}completed{% endif %}">
+      <i class="fa-solid fa-shop"></i>
+    </div>
+    <div class="timeline-content">
+      <div class="timeline-header">
+        <div class="timeline-title">Stage 4: Seller Retail Shelf (Block 4)</div>
+        {% if batch.stage_num >= 4 %}
+        <span class="badge badge-stage-4"><i class="fa-solid fa-check"></i> On Retail Shelf</span>
+        {% else %}
+        <span class="badge" style="background: var(--slate-100); color: var(--slate-600);"><i
+            class="fa-solid fa-clock"></i> Pending Retail Arrival</span>
+        {% endif %}
+      </div>
+      {% if batch.stage_num >= 4 %}
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Authenticated on retail shelves ready for direct consumer scan and verification.
+      </p>
+      <div class="timeline-grid">
+        <div class="timeline-field">
+          <span class="field-label">Retail Boutique</span>
+          <span class="field-value">{{ batch.seller_name or 'Pending' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Store Location</span>
+          <span class="field-value">{{ batch.store_location or 'N/A' }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Retail Price</span>
+          <span class="field-value" style="color: var(--gold-700); font-weight: 700;">{{ batch.sale_price or 'N/A'
+            }}</span>
+        </div>
+        <div class="timeline-field">
+          <span class="field-label">Shelf Arrival Date</span>
+          <span class="field-value">{{ batch.shelf_arrival_date }}</span>
+        </div>
+      </div>
+      {% else %}
+      <p style="font-size: 0.88rem; color: var(--text-muted); font-style: italic;">
+        Not yet arrived at retail shelf. Go to "Seller Management" in the menu to record retail arrival.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="honey-card" style="text-align: center; padding: 60px 20px;">
+  <i class="fa-solid fa-route" style="font-size: 3rem; color: var(--cream-400); margin-bottom: 14px;"></i>
+  <h3 style="color: var(--brown-900); font-family: var(--font-heading); margin-bottom: 8px;">No Batch Selected</h3>
+  <p style="color: var(--text-muted); max-width: 440px; margin: 0 auto;">
+    Enter a Batch ID above or pick one from the quick batch pills to view its complete 4-stage supply chain journey.
+  </p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Register Honey Batch — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="create-batch-page" style="max-width: 900px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="margin-bottom: 24px;">
+    <a href="{{ url_for('batches') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Batches
+    </a>
+    <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+      <i class="fa-solid fa-plus-circle"></i> Register Honey Batch (Stage 1: Apiary Harvest)
+    </h1>
+    <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+      Record origin apiary harvest details. This action automatically mines Block 1 onto the SHA-256 blockchain ledger and generates a public traceability QR code.
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 28px;">
+    <form action="{{ url_for('create_batch') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+
+      <!-- Row 1: Batch ID & Product Name -->
+      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Batch ID <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="batch_id" 
+            value="{{ suggested_batch_id or '' }}" 
+            placeholder="e.g. HC-2026-1001" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #F4B400; font-weight: 700; font-size: 0.95rem; box-sizing: border-box;"
+          >
+          <small style="color: #6B7280; font-size: 0.75rem;">Unique identifier across chain</small>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Product Name <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="product_name" 
+            placeholder="e.g. Pure Mountain Blossom Raw Honey" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+      </div>
+
+      <!-- Row 2: Floral Source & Harvest Date -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Floral / Botanical Source <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="floral_source" 
+            placeholder="e.g. Acacia, Wildflower, Manuka, Clover" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Harvest Date <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="date" 
+            name="harvest_date" 
+            value="{{ today_date }}" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+      </div>
+
+      <!-- Row 3: Apiary Name & Beekeeper Name -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Apiary Name <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="apiary_name" 
+            placeholder="e.g. Sunny Ridge Meadow Apiary" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Beekeeper Name <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="beekeeper_name" 
+            value="{{ session.get('user_name', '') }}" 
+            placeholder="e.g. Master Beekeeper Thomas" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+      </div>
+
+      <!-- Row 4: Origin Location & Quantity (kg) -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Origin Geographic Location <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="origin_location" 
+            placeholder="e.g. Black Forest, Baden-Württemberg, Germany" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Harvest Quantity (kg) <span style="color: #F4B400;">*</span>
+          </label>
+          <input 
+            type="number" 
+            step="0.1" 
+            min="1" 
+            name="quantity_kg" 
+            placeholder="e.g. 250" 
+            required
+            style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;"
+          >
+        </div>
+      </div>
+
+      <!-- Row 5: Comb Type & Extraction Method -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Comb Structure Type
+          </label>
+          <select name="comb_type" style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;">
+            <option value="Pure Capped Comb">Pure Capped Comb</option>
+            <option value="Natural Comb Frame">Natural Comb Frame</option>
+            <option value="Top Bar Hive Comb">Top Bar Hive Comb</option>
+            <option value="Wild Harvested Comb">Wild Harvested Comb</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Extraction Method
+          </label>
+          <select name="extraction_method" style="width: 100%; padding: 11px 14px; background: #251B14; border: 1.5px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.95rem; box-sizing: border-box;">
+            <option value="Unheated Cold Centrifugation">Unheated Cold Centrifugation</option>
+            <option value="Cold Gravity Pressed">Cold Gravity Pressed</option>
+            <option value="Cut Comb Unextracted">Cut Comb Unextracted</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 14px; justify-content: flex-end;">
+        <a href="{{ url_for('batches') }}" style="padding: 12px 24px; border-radius: 8px; border: 1px solid #4A2C16; color: #9CA3AF; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center;">
+          Cancel
+        </a>
+        <button type="submit" class="btn-primary" style="width: auto; padding: 12px 28px; font-size: 1rem;">
+          <i class="fa-solid fa-cube"></i> Mine Block 1 &amp; Register Batch
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

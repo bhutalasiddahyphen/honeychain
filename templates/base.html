@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HONEYCHAIN{% endblock %} - Blockchain Honey Traceability</title>
+  <meta name="description" content="HONEYCHAIN: Decentralized Blockchain Honey Traceability Platform">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/honeychain-logo.png') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Mobile Top Navigation Bar -->
+  <header class="mobile-topbar">
+    <button type="button" class="mobile-hamburger" id="mobile-menu-btn" aria-label="Open Navigation Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="mobile-brand">
+      <img src="{{ url_for('static', filename='images/honey-logo.svg') }}" alt="Logo">
+      <span>HONEYCHAIN</span>
+    </div>
+    <a href="{{ url_for('profile') }}" style="color: var(--gold-400); font-size: 1.1rem;">
+      <i class="fa-solid fa-circle-user"></i>
+    </a>
+  </header>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="app-container">
+    <!-- Left-Side Vertical Fixed Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Sidebar Header / Brand with explicit Close Menu Button -->
+      <div class="sidebar-header">
+        <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+          <img src="{{ url_for('static', filename='images/honey-logo.svg') }}" alt="HoneyChain Logo" class="sidebar-logo">
+          <div class="brand-text-group">
+            <span class="brand-title">HONEY<span>CHAIN</span></span>
+            <span class="brand-sub">Blockchain Provenance</span>
+          </div>
+        </a>
+        <button type="button" class="sidebar-close-btn" id="sidebar-close-btn" title="Close Menu Bar">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Close</span>
+        </button>
+      </div>
+
+      <!-- Navigation Menu: 15 Options with Golden Yellow Icons -->
+      <nav class="sidebar-nav">
+        <!-- 1. Dashboard -->
+        <a href="{{ url_for('dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" title="Dashboard">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- 2. Beekeeper Management (Step 1) -->
+        <a href="{{ url_for('beekeeper') }}" class="nav-item {% if active_page == 'beekeeper' %}active{% endif %}" title="Step 1: Beekeeper Management">
+          <i class="fa-solid fa-seedling"></i>
+          <span>Beekeeper Management</span>
+        </a>
+
+        <!-- 3. Honey Batch Management (Step 2) -->
+        <a href="{{ url_for('batches') }}" class="nav-item {% if active_page == 'batches' %}active{% endif %}" title="Step 2: Honey Batch Management">
+          <i class="fa-solid fa-boxes-stacked"></i>
+          <span>Honey Batch Management</span>
+        </a>
+
+        <!-- 4. Laboratory Testing (Step 3) -->
+        <a href="{{ url_for('laboratory') }}" class="nav-item {% if active_page == 'laboratory' %}active{% endif %}" title="Step 3: Laboratory Testing">
+          <i class="fa-solid fa-flask-vial"></i>
+          <span>Laboratory Testing</span>
+        </a>
+
+        <!-- 5. Packer Management (Step 4) -->
+        <a href="{{ url_for('packer') }}" class="nav-item {% if active_page == 'packer' %}active{% endif %}" title="Step 4: Packer Management">
+          <i class="fa-solid fa-box-open"></i>
+          <span>Packer Management</span>
+        </a>
+
+        <!-- 6. Seller Management (Step 5) -->
+        <a href="{{ url_for('seller') }}" class="nav-item {% if active_page == 'seller' %}active{% endif %}" title="Step 5: Seller Management">
+          <i class="fa-solid fa-shop"></i>
+          <span>Seller Management</span>
+        </a>
+
+        <!-- 7. Blockchain Records -->
+        <a href="{{ url_for('blockchain_records') }}" class="nav-item {% if active_page == 'blockchain' %}active{% endif %}" title="Blockchain Records">
+          <i class="fa-solid fa-link"></i>
+          <span>Blockchain Records</span>
+        </a>
+
+        <!-- 8. QR Code Generator -->
+        <a href="{{ url_for('qr_generator') }}" class="nav-item {% if active_page == 'qr_generator' %}active{% endif %}" title="QR Code Generator">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Code Generator</span>
+        </a>
+
+        <!-- 8b. Scan QR Code -->
+        <a href="{{ url_for('qr_scan') }}" class="nav-item {% if active_page == 'qr_scan' %}active{% endif %}" title="Scan QR Code with Camera">
+          <i class="fa-solid fa-camera"></i>
+          <span>Scan QR Code</span>
+        </a>
+
+        <!-- 9. Track Honey -->
+        <a href="{{ url_for('track_honey') }}" class="nav-item {% if active_page == 'track_honey' %}active{% endif %}" title="Track Honey">
+          <i class="fa-solid fa-route"></i>
+          <span>Track Honey</span>
+        </a>
+
+        <!-- 10. Product Verification -->
+        <a href="{{ url_for('verification') }}" class="nav-item {% if active_page == 'verification' %}active{% endif %}" title="Product Verification">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Product Verification</span>
+        </a>
+
+        <!-- 11. Reports -->
+        <a href="{{ url_for('reports') }}" class="nav-item {% if active_page == 'reports' %}active{% endif %}" title="Reports">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Reports</span>
+        </a>
+
+        <!-- 12. Notifications -->
+        <a href="{{ url_for('notifications_page') }}" class="nav-item {% if active_page == 'notifications' %}active{% endif %}" title="Notifications">
+          <i class="fa-solid fa-bell"></i>
+          <span>Notifications</span>
+        </a>
+
+        <!-- 13. User Profile -->
+        <a href="{{ url_for('profile') }}" class="nav-item {% if active_page == 'profile' %}active{% endif %}" title="User Profile">
+          <i class="fa-solid fa-circle-user"></i>
+          <span>User Profile</span>
+        </a>
+
+        <!-- 14. Settings -->
+        <a href="{{ url_for('settings_page') }}" class="nav-item {% if active_page == 'settings' %}active{% endif %}" title="Settings">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Settings</span>
+        </a>
+
+        <!-- 15. Logout -->
+        <a href="{{ url_for('logout') }}" class="nav-item nav-item-logout" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar User Footer -->
+      <div class="sidebar-footer">
+        <div class="user-avatar-badge">
+          {{ (session.get('user_name') or 'U')[:1] | upper }}
+        </div>
+        <div class="user-meta-group">
+          <span class="user-name-text">{{ session.get('user_name', 'Honey User') }}</span>
+          <span class="user-role-text">{{ session.get('user_role', 'Consortium Partner') }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper" id="main-wrapper">
+      <!-- Main Topbar with Open / Close Menu Bar Control -->
+      <header class="main-topbar">
+        <div class="main-topbar-left">
+          <button type="button" class="btn-menu-action" id="menu-toggle-btn" title="Open or Close Menu Bar">
+            <i class="fa-solid fa-bars" id="menu-toggle-icon"></i>
+            <span id="menu-toggle-label">Close Menu</span>
+          </button>
+          <span class="topbar-divider"></span>
+          <span class="topbar-section-title">
+            {% if active_page == 'dashboard' %}Dashboard
+            {% elif active_page == 'beekeeper' %}Step 1: Beekeeper Management
+            {% elif active_page == 'batches' %}Step 2: Honey Batch Management (Block 1)
+            {% elif active_page == 'laboratory' %}Step 3: Laboratory Testing (Block 2)
+            {% elif active_page == 'packer' %}Step 4: Packer Management (Block 3)
+            {% elif active_page == 'seller' %}Step 5: Seller Management (Block 4)
+            {% elif active_page == 'blockchain' %}Blockchain Records (SHA-256)
+            {% elif active_page == 'qr_generator' %}QR Code Generator
+            {% elif active_page == 'track_honey' %}Track Honey Journey
+            {% elif active_page == 'verification' %}Product Verification
+            {% elif active_page == 'reports' %}Reports &amp; Data Export
+            {% elif active_page == 'notifications' %}System Notifications
+            {% elif active_page == 'profile' %}User Profile
+            {% elif active_page == 'settings' %}Application Settings
+            {% else %}HoneyChain Consortium
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="main-topbar-right">
+          <span class="blockchain-status-chip">
+            <i class="fa-solid fa-cube"></i> SHA-256 Ledger Active
+          </span>
+          <a href="{{ url_for('profile') }}" class="topbar-user-link">
+            <i class="fa-solid fa-circle-user"></i> {{ session.get('user_name', 'User') }}
+          </a>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-container">
+              {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                  <span>
+                    {% if category == 'success' %}
+                      <i class="fa-solid fa-circle-check"></i>
+                    {% elif category == 'error' %}
+                      <i class="fa-solid fa-circle-exclamation"></i>
+                    {% else %}
+                      <i class="fa-solid fa-circle-info"></i>
+                    {% endif %}
+                    {{ message }}
+                  </span>
+                  <button type="button" class="flash-close">&times;</button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Content Block -->
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if batch %}{{ batch.product_name }} ({{ batch.batch_id }}){% else %}Trace Honey Batch{% endif %} — HONEY CHAIN</title>
+  <meta name="description" content="Public Honey Provenance &amp; Blockchain Authenticity Certificate">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/honey-logo.svg') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --hc-yellow: #F4B400;
+      --hc-yellow-dark: #D99B00;
+      --hc-yellow-light: #FFF8E7;
+      --hc-brown: #4A2C16;
+      --hc-brown-light: #6A4426;
+      --hc-card: #FFFFFF;
+      --hc-border: #EADBCE;
+      --hc-green: #10B981;
+      --hc-text: #2D1A0D;
+      --hc-muted: #6B7280;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--hc-yellow-light);
+      color: var(--hc-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Public Header */
+    .public-header {
+      background: var(--hc-brown);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--hc-yellow);
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #FFFFFF;
+    }
+
+    .brand-link img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+
+    .brand-title span { color: var(--hc-yellow); }
+
+    .header-actions a {
+      color: var(--hc-yellow);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    /* Container */
+    .container {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 30px 20px;
+      box-sizing: border-box;
+      flex-grow: 1;
+    }
+
+    /* Search Bar */
+    .search-card {
+      background: var(--hc-card);
+      border: 1px solid var(--hc-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(74, 44, 22, 0.06);
+    }
+
+    .search-form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--hc-border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      outline: none;
+      color: var(--hc-text);
+    }
+
+    .search-input:focus {
+      border-color: var(--hc-yellow);
+      box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.2);
+    }
+
+    .search-btn {
+      background: var(--hc-yellow);
+      color: var(--hc-brown);
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    /* Product Certificate Banner */
+    .certificate-card {
+      background: var(--hc-card);
+      border: 1px solid var(--hc-border);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 18px rgba(74, 44, 22, 0.08);
+      position: relative;
+    }
+
+    .cert-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #D1FAE5;
+      color: #065F46;
+      border: 1px solid #6EE7B7;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .product-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--hc-brown);
+      margin: 0 0 6px 0;
+    }
+
+    .product-meta {
+      font-size: 0.95rem;
+      color: var(--hc-muted);
+      margin-bottom: 18px;
+    }
+
+    /* Visual Timeline */
+    .timeline {
+      position: relative;
+      margin-top: 30px;
+      padding-left: 36px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      bottom: 20px;
+      left: 14px;
+      width: 3px;
+      background: var(--hc-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -36px;
+      top: 4px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--hc-yellow);
+      color: var(--hc-brown);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(244, 180, 0, 0.4);
+    }
+
+    .timeline-dot.done {
+      background: var(--hc-green);
+      color: #FFFFFF;
+    }
+
+    .timeline-dot.pending {
+      background: #E5E7EB;
+      color: #9CA3AF;
+      box-shadow: none;
+    }
+
+    .timeline-content {
+      background: var(--hc-card);
+      border: 1px solid var(--hc-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(74, 44, 22, 0.04);
+    }
+
+    .stage-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--hc-brown);
+      margin: 0 0 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stage-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
+
+    .stage-details div strong {
+      color: var(--hc-muted);
+    }
+
+    .hash-badge {
+      font-family: monospace;
+      font-size: 0.78rem;
+      background: #FAF6F0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--hc-brown);
+      word-break: break-all;
+      display: block;
+      margin-top: 10px;
+      border: 1px solid var(--hc-border);
+    }
+
+    .footer {
+      background: var(--hc-brown);
+      color: rgba(255, 255, 255, 0.8);
+      text-align: center;
+      padding: 20px;
+      font-size: 0.85rem;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="public-header">
+    <a href="{{ url_for('index') }}" class="brand-link">
+      <img src="{{ url_for('static', filename='images/honey-logo.svg') }}" alt="Honey Chain Logo">
+      <div class="brand-title">HONEY <span>CHAIN</span></div>
+    </a>
+    <div class="header-actions">
+      <a href="{{ url_for('qr_scan') }}"><i class="fa-solid fa-camera"></i> Scan Another Batch</a>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Quick Search Bar -->
+    <div class="search-card">
+      <form action="{{ url_for('trace_route') }}" method="GET" class="search-form" onsubmit="event.preventDefault(); const id = document.getElementById('traceSearchInput').value.trim(); if(id) window.location.href='/trace/' + encodeURIComponent(id);">
+        <input type="text" id="traceSearchInput" class="search-input" value="{{ batch.batch_id if batch else '' }}" placeholder="Enter Honey Batch ID (e.g. HC-2026-1001)" required>
+        <button type="submit" class="search-btn">Verify Authenticity</button>
+      </form>
+    </div>
+
+    {% if batch %}
+      <!-- Product Authenticity Certificate -->
+      <div class="certificate-card">
+        <div class="cert-badge">
+          <i class="fa-solid fa-shield-halved"></i> Cryptographically Verified on SHA-256 Ledger
+        </div>
+        <h1 class="product-title">{{ batch.product_name }}</h1>
+        <div class="product-meta">
+          <strong>Batch ID:</strong> {{ batch.batch_id }} &bull; 
+          <strong>Floral Origin:</strong> {{ batch.floral_source }} &bull; 
+          <strong>Harvested:</strong> {{ batch.harvest_date }}
+        </div>
+
+        <div style="background: #FAF6F0; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; border: 1px solid var(--hc-border);">
+          <strong style="color: var(--hc-brown);">Blockchain Proof:</strong> 
+          Mined in Block #{{ batch.block_index }} with transaction hash:
+          <code style="display: block; color: var(--hc-green); font-size: 0.78rem; word-break: break-all; margin-top: 3px;">
+            {{ batch.tx_hash }}
+          </code>
+        </div>
+      </div>
+
+      <!-- 4-Stage Traceability Timeline -->
+      <div class="timeline">
+        
+        <!-- Stage 1: Beekeeper -->
+        <div class="timeline-item">
+          <div class="timeline-dot done"><i class="fa-solid fa-check"></i></div>
+          <div class="timeline-content">
+            <div class="stage-title">
+              <span>🐝 Stage 1: Apiary Harvest</span>
+              <span style="font-size: 0.8rem; color: var(--hc-green); font-weight: 600;">Verified</span>
+            </div>
+            <div class="stage-details">
+              <div><strong>Beekeeper:</strong> {{ batch.beekeeper_name }}</div>
+              <div><strong>Apiary:</strong> {{ batch.apiary_name }}</div>
+              <div><strong>Location:</strong> {{ batch.origin_location }}</div>
+              <div><strong>Harvest Date:</strong> {{ batch.harvest_date }}</div>
+              <div><strong>Volume:</strong> {{ batch.quantity_kg }} kg</div>
+              <div><strong>Extraction:</strong> {{ batch.extraction_method }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 2: Laboratory Assay -->
+        <div class="timeline-item">
+          <div class="timeline-dot {% if batch.stage_num >= 2 %}done{% else %}pending{% endif %}">
+            {% if batch.stage_num >= 2 %}<i class="fa-solid fa-check"></i>{% else %}2{% endif %}
+          </div>
+          <div class="timeline-content">
+            <div class="stage-title">
+              <span>🧪 Stage 2: Laboratory Quality Assurance</span>
+              {% if batch.stage_num >= 2 %}
+                <span style="font-size: 0.8rem; color: var(--hc-green); font-weight: 600;">Passed &amp; Certified</span>
+              {% else %}
+                <span style="font-size: 0.8rem; color: var(--hc-muted); font-weight: 500;">Pending Assay</span>
+              {% endif %}
+            </div>
+
+            {% if batch.stage_num >= 2 %}
+              <div class="stage-details">
+                <div><strong>Testing Facility:</strong> {{ batch.lab_name }}</div>
+                <div><strong>Certified Inspector:</strong> {{ batch.inspector_name }}</div>
+                <div><strong>Certificate Ref:</strong> {{ batch.certificate_no }}</div>
+                <div><strong>Purity Score:</strong> <span style="color: var(--hc-green); font-weight: 700;">{{ batch.purity_score }}%</span></div>
+                <div><strong>Moisture Content:</strong> {{ batch.moisture_content }}%</div>
+                <div><strong>HMF Level:</strong> {{ batch.hmf_level }} mg/kg</div>
+              </div>
+              <div class="hash-badge">
+                <strong>HMAC SHA-256 Signature:</strong> {{ batch.digital_signature }}
+              </div>
+            {% else %}
+              <p style="color: var(--hc-muted); font-size: 0.88rem; margin: 4px 0 0 0;">
+                Laboratory NMR and purity testing results have not yet been registered for this batch.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Stage 3: Packaging -->
+        <div class="timeline-item">
+          <div class="timeline-dot {% if batch.stage_num >= 3 %}done{% else %}pending{% endif %}">
+            {% if batch.stage_num >= 3 %}<i class="fa-solid fa-check"></i>{% else %}3{% endif %}
+          </div>
+          <div class="timeline-content">
+            <div class="stage-title">
+              <span>📦 Stage 3: Bottling &amp; Tamper Sealing</span>
+              {% if batch.stage_num >= 3 %}
+                <span style="font-size: 0.8rem; color: var(--hc-green); font-weight: 600;">Sealed &amp; Packaged</span>
+              {% else %}
+                <span style="font-size: 0.8rem; color: var(--hc-muted); font-weight: 500;">Pending Packaging</span>
+              {% endif %}
+            </div>
+
+            {% if batch.stage_num >= 3 %}
+              <div class="stage-details">
+                <div><strong>Facility:</strong> {{ batch.packaging_plant }}</div>
+                <div><strong>Supervisor:</strong> {{ batch.packaging_supervisor }}</div>
+                <div><strong>Container:</strong> {{ batch.jar_format }}</div>
+                <div><strong>Tamper Seal ID:</strong> <span style="color: var(--hc-green); font-weight: 700;">{{ batch.tamper_seal_id }}</span></div>
+                <div><strong>Lot Number:</strong> {{ batch.lot_number }}</div>
+                <div><strong>Packaged Date:</strong> {{ batch.packaging_date }}</div>
+              </div>
+            {% else %}
+              <p style="color: var(--hc-muted); font-size: 0.88rem; margin: 4px 0 0 0;">
+                Packaging and tamper-seal details have not yet been recorded.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Stage 4: Retail -->
+        <div class="timeline-item">
+          <div class="timeline-dot {% if batch.stage_num >= 4 %}done{% else %}pending{% endif %}">
+            {% if batch.stage_num >= 4 %}<i class="fa-solid fa-check"></i>{% else %}4{% endif %}
+          </div>
+          <div class="timeline-content">
+            <div class="stage-title">
+              <span>🏪 Stage 4: Authorized Retailer</span>
+              {% if batch.stage_num >= 4 %}
+                <span style="font-size: 0.8rem; color: var(--hc-green); font-weight: 600;">On Shelf</span>
+              {% else %}
+                <span style="font-size: 0.8rem; color: var(--hc-muted); font-weight: 500;">In Transit</span>
+              {% endif %}
+            </div>
+
+            {% if batch.stage_num >= 4 %}
+              <div class="stage-details">
+                <div><strong>Retailer:</strong> {{ batch.seller_name }}</div>
+                <div><strong>Store Location:</strong> {{ batch.store_location }}</div>
+                <div><strong>License:</strong> {{ batch.license_no }}</div>
+                <div><strong>Shelf Arrival:</strong> {{ batch.shelf_arrival_date }}</div>
+                <div><strong>Retail Status:</strong> <span style="color: var(--hc-green); font-weight: 700;">{{ batch.retail_status }}</span></div>
+              </div>
+            {% else %}
+              <p style="color: var(--hc-muted); font-size: 0.88rem; margin: 4px 0 0 0;">
+                Retail arrival has not yet been registered.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+    {% else %}
+      <!-- Batch Not Found Clean Message -->
+      <div class="certificate-card" style="text-align: center; padding: 50px 20px;">
+        <div style="font-size: 3rem; color: #D97706; margin-bottom: 14px;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <h2 style="margin: 0 0 8px 0; color: var(--hc-brown);">Batch Record Not Found</h2>
+        <p style="color: var(--hc-muted); max-width: 480px; margin: 0 auto 20px auto; font-size: 0.95rem;">
+          No honey batch with ID "<strong>{{ searched_id or '' }}</strong>" exists on the HoneyChain ledger. Please check the batch code on your honey jar label and try again.
+        </p>
+        <a href="{{ url_for('index') }}" class="search-btn" style="text-decoration: none; display: inline-block;">
+          Return to Home
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <footer class="footer">
+    © 2026 HONEY CHAIN Consortium. Decentralized Honey Provenance for MSMEs. Powered by SHA-256 Ledger.
+  </footer>
+
+</body>
+</html>
+

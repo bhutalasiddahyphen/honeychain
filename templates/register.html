@@ -3,269 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register Honey Harvest - Block 1: Honey Batch Registered</title>
-  <meta name="description" content="Register and mint Block 1: Honey Batch Registered onto the immutable HoneyChain blockchain ledger.">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Create Account — HONEY CHAIN</title>
+  <meta name="description" content="Register an account on HoneyChain: Blockchain-Based Honey Traceability System">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/honey-logo.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f59e0b">
-  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <style>
+    .auth-container { max-width: 480px; }
+    .role-select {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      border: 1px solid var(--hc-border);
+      border-radius: var(--hc-radius-md);
+      background-color: #FFFFFF;
+      color: var(--hc-text-primary);
+      box-sizing: border-box;
+      outline: none;
+    }
+    .role-select:focus {
+      border-color: var(--hc-amber);
+      box-shadow: var(--hc-shadow-focus);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 520px) {
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+    }
+  </style>
 </head>
-<body>
+<body class="auth-body">
 
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="container nav-container">
-      <a href="{{ url_for('index') }}" class="brand-logo">
-        <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
-        <div class="brand-text">
-          <span class="brand-name">Honey<span>Chain</span></span>
-          <span class="brand-tagline">5-Block Ledger Architecture</span>
-        </div>
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- Honey Chain Logo & Title -->
+      <div class="auth-header">
+        <a href="{{ url_for('index') }}" class="auth-logo" title="Back to HoneyChain Welcome Page">
+          <img src="{{ url_for('static', filename='images/honey-logo.svg') }}" alt="Honey Chain Logo">
+        </a>
+        <h1 class="auth-title">HONEY CHAIN</h1>
+        <p class="auth-subtitle">Create your supply chain partner account</p>
+      </div>
+
+      <!-- Google Sign-Up Button -->
+      <a href="{{ url_for('google_login') }}" class="btn-google">
+        <svg viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <span>Sign up with Google</span>
       </a>
 
-      <ul class="nav-links">
-        <li><a href="{{ url_for('index') }}" class="nav-link"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fa-solid fa-cubes"></i> Blockchain Explorer</a></li>
-        <li><a href="{{ url_for('register') }}" class="nav-cta active"><i class="fa-solid fa-plus-circle"></i> Register Batch (Block 1)</a></li>
-      </ul>
-    </div>
-  </nav>
+      <div class="auth-divider">
+        <span>or register with email</span>
+      </div>
 
-  <!-- Flash Notifications -->
-  <div class="container flash-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message flash-{{ category }}" role="alert">
-            <span><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
+      <!-- Flash Notifications -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert-message alert-{{ 'error' if category == 'error' or category == 'danger' else ('success' if category == 'success' else 'info') }}">
+              <i class="fa-solid fa-{{ 'triangle-exclamation' if category == 'error' or category == 'danger' else ('circle-check' if category == 'success' else 'circle-info') }}"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Registration Form -->
+      <form action="{{ url_for('register') }}" method="POST" class="auth-form">
+        <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+
+        <!-- Full Name -->
+        <div class="form-group">
+          <label for="full_name">Full Name</label>
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-user prefix-icon"></i>
+            <input 
+              type="text" 
+              id="full_name" 
+              name="full_name" 
+              class="auth-input" 
+              placeholder="e.g. Elena Vance" 
+              required
+              autofocus
+            >
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+        </div>
+
+        <!-- Email & Phone in row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-envelope prefix-icon"></i>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                class="auth-input" 
+                placeholder="name@domain.com" 
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-phone prefix-icon"></i>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone" 
+                class="auth-input" 
+                placeholder="+1 555-0199"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label for="role">Select Your Supply Chain Role</label>
+          <select id="role" name="role" class="role-select" required>
+            <option value="beekeeper">Beekeeper (Apiary Production &amp; Harvesting)</option>
+            <option value="lab">Laboratory (Quality Assurance &amp; NMR Testing)</option>
+            <option value="packager">Packer (Bottling &amp; Tamper Sealing)</option>
+            <option value="seller">Seller (Authorized Retail Distribution)</option>
+            <option value="consumer">Consumer (Public Customer / Shopper)</option>
+          </select>
+        </div>
+
+        <!-- Organization / Apiary Name -->
+        <div class="form-group">
+          <label for="organization">Organization / Apiary / Facility Name</label>
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-building prefix-icon"></i>
+            <input 
+              type="text" 
+              id="organization" 
+              name="organization" 
+              class="auth-input" 
+              placeholder="e.g. Alpine Meadow Apiaries"
+            >
+          </div>
+        </div>
+
+        <!-- Password and Confirm Password -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-lock prefix-icon"></i>
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="auth-input" 
+                placeholder="Min 6 chars" 
+                required
+              >
+              <button type="button" class="toggle-password" data-target="password" title="Show or hide password">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirm</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-lock prefix-icon"></i>
+              <input 
+                type="password" 
+                id="confirm_password" 
+                name="confirm_password" 
+                class="auth-input" 
+                placeholder="Re-type" 
+                required
+              >
+              <button type="button" class="toggle-password" data-target="confirm_password" title="Show or hide password">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="auth-btn-primary">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Create Account</span>
+        </button>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+          Already have an account? <a href="{{ url_for('login') }}">Sign In</a> &bull; 
+          <a href="{{ url_for('admin_login') }}">Admin Portal</a>
+          <br><br>
+          <a href="{{ url_for('index') }}" style="font-size: 0.82rem; color: #6B7280; text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i> Return to Welcome Page
+          </a>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <main class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
-    <div style="max-width: 960px; margin: 0 auto;">
-
-      <div style="margin-bottom: 2rem;">
-        <a href="{{ url_for('index') }}" style="font-size: 0.88rem; color: var(--text-dim); display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
-          <i class="fa-solid fa-arrow-left"></i> Back to Home
-        </a>
-        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
-          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-family: var(--font-mono);">LIFECYCLE STEP 1</span>
-        </div>
-        <h1 style="font-size: 2.2rem; margin-bottom: 0.4rem;">
-          <i class="fa-solid fa-seedling text-honey"></i> Mine Block 1: Honey Batch Registered
-        </h1>
-        <p>Register the origin extraction details from the apiary directly into the HoneyChain decentralized ledger.</p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-        
-        <!-- Registration Form Card -->
-        <div class="glass-card" style="border-top: 4px solid #f59e0b;">
-          <form action="{{ url_for('register') }}" method="POST" id="register-batch-form">
-            
-            <!-- Batch ID -->
-            <div class="form-group">
-              <label for="batch_id" class="form-label">Batch ID Identifier</label>
-              <div style="display: flex; gap: 0.5rem;">
-                <input 
-                  type="text" 
-                  name="batch_id" 
-                  id="batch_id" 
-                  class="form-control" 
-                  value="{{ suggested_id }}" 
-                  required
-                >
-                <button type="button" class="btn btn-secondary btn-sm" onclick="generateNewBatchId()" title="Generate Random ID">
-                  <i class="fa-solid fa-arrows-rotate"></i>
-                </button>
-              </div>
-              <small style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">
-                Unique cryptographic key for this honey harvest extraction lot.
-              </small>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label for="product_name" class="form-label">Honey Product Name</label>
-                <input 
-                  type="text" 
-                  name="product_name" 
-                  id="product_name" 
-                  class="form-control" 
-                  placeholder="e.g. Organic Alpine Blossom Raw Honey" 
-                  required
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="floral_source" class="form-label">Floral Variety Source</label>
-                <select name="floral_source" id="floral_source" class="form-control" required>
-                  <option value="Wildflower Flora">Wildflower Flora</option>
-                  <option value="Manuka (Leptospermum)">Manuka (Leptospermum)</option>
-                  <option value="Acacia (Black Locust)">Acacia (Black Locust)</option>
-                  <option value="Alpine Flora & Rhododendron">Alpine Flora & Rhododendron</option>
-                  <option value="Lavender Blossom">Lavender Blossom</option>
-                  <option value="Orange Blossom">Orange Blossom</option>
-                  <option value="Sidr (Ziziphus)">Sidr (Ziziphus)</option>
-                  <option value="Eucalyptus">Eucalyptus</option>
-                  <option value="Clover Blend">Clover Blend</option>
-                  <option value="Chestnut">Chestnut</option>
-                  <option value="Forest Honeydew">Forest Honeydew</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label for="apiary_name" class="form-label">Apiary / Farm Name</label>
-                <input 
-                  type="text" 
-                  name="apiary_name" 
-                  id="apiary_name" 
-                  class="form-control" 
-                  placeholder="e.g. Valais High Meadow Apiary" 
-                  required
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="beekeeper_name" class="form-label">Master Beekeeper</label>
-                <input 
-                  type="text" 
-                  name="beekeeper_name" 
-                  id="beekeeper_name" 
-                  class="form-control" 
-                  placeholder="e.g. Markus Zenhäusern" 
-                  required
-                >
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label for="origin_location" class="form-label">Origin Location & Region</label>
-                <input 
-                  type="text" 
-                  name="origin_location" 
-                  id="origin_location" 
-                  class="form-control" 
-                  placeholder="e.g. Valais Alpine Valley, Switzerland" 
-                  required
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="harvest_date" class="form-label">Harvest Extraction Date</label>
-                <input 
-                  type="date" 
-                  name="harvest_date" 
-                  id="harvest_date" 
-                  class="form-control" 
-                  value="{{ today_date }}" 
-                  required
-                >
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label for="comb_type" class="form-label">Comb Type</label>
-                <input 
-                  type="text" 
-                  name="comb_type" 
-                  id="comb_type" 
-                  class="form-control" 
-                  value="Virgin Capped Comb" 
-                  required
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="extraction_method" class="form-label">Extraction Method</label>
-                <input 
-                  type="text" 
-                  name="extraction_method" 
-                  id="extraction_method" 
-                  class="form-control" 
-                  value="Unheated Centrifugation" 
-                  required
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="quantity_kg" class="form-label">Lot Quantity (kg)</label>
-                <input 
-                  type="number" 
-                  step="1" 
-                  name="quantity_kg" 
-                  id="quantity_kg" 
-                  class="form-control" 
-                  value="250" 
-                  required
-                >
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="notes" class="form-label">Apiary Field & Extraction Notes</label>
-              <textarea 
-                name="notes" 
-                id="notes" 
-                class="form-control" 
-              >Hand-extracted raw comb, unheated cold centrifugation. Pure unadulterated floral honey logged by master beekeeper.</textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem;" id="submit-batch-btn">
-              <i class="fa-solid fa-cube"></i> Mine Block 1: Honey Batch Registered
-            </button>
-          </form>
-        </div>
-
-        <!-- 5-Block Lifecycle Context Panel -->
-        <div>
-          <div class="glass-card" style="margin-bottom: 1.5rem; border-color: rgba(245, 158, 11, 0.3);">
-            <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem; color: var(--honey-400);">
-              <i class="fa-solid fa-cubes"></i> 5-Block Architecture
-            </h3>
-            <p style="font-size: 0.85rem; margin-bottom: 1rem; color: var(--text-muted);">
-              Submitting this form records <strong>Block 1</strong> in the chain:
-            </p>
-            <div style="font-size: 0.82rem; font-family: var(--font-mono); line-height: 2; color: #cbd5e1;">
-              <div>&bull; Block 0: Genesis Block <i class="fa-solid fa-check" style="color: var(--emerald-400);"></i></div>
-              <div style="color: var(--honey-300); font-weight: 700;">&bull; Block 1: Batch Registered <i class="fa-solid fa-arrow-left"></i> YOU ARE HERE</div>
-              <div style="color: var(--text-dim);">&bull; Block 2: Lab Test Recorded</div>
-              <div style="color: var(--text-dim);">&bull; Block 3: Packaging Recorded</div>
-              <div style="color: var(--text-dim);">&bull; Block 4: Seller Info Recorded</div>
-            </div>
-          </div>
-
-          <div class="glass-card" style="border-color: rgba(16, 185, 129, 0.3);">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-              <i class="fa-solid fa-shield-halved" style="color: var(--emerald-400);"></i>
-              <h4 style="font-size: 0.95rem; color: #fff;">Proof of Work Sealed</h4>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-muted);">
-              A unique SHA-256 block will be mined and linked to the preceding block hash. A scannable QR code will be generated instantly.
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <script>
-    function generateNewBatchId() {
-      const year = new Date().getFullYear();
-      const rand = Math.floor(1000 + Math.random() * 9000);
-      document.getElementById('batch_id').value = `HC-${year}-${rand}`;
-    }
-  </script>
-
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Stage 1: Beekeeper Management — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="stage-page" style="max-width: 1400px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Page Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+        <i class="fa-solid fa-seedling"></i> Stage 1: Beekeeper &amp; Apiary Management
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        Register beekeepers, configure apiary locations, and record raw honey harvests into Block 1.
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <a href="{{ url_for('create_batch') }}" class="btn-primary" style="width: auto; padding: 9px 18px; font-size: 0.9rem; text-decoration: none;">
+        <i class="fa-solid fa-plus"></i> Record New Honey Harvest
+      </a>
+    </div>
+  </div>
+
+  <!-- Top Action Cards: Register Beekeeper Form -->
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 28px;">
+    
+    <!-- Beekeeper Registration Form Card -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #F4B400; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-user-plus"></i> Register Beekeeper
+      </h3>
+
+      <form action="{{ url_for('stages_beekeeper') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+        <input type="hidden" name="action" value="add_beekeeper">
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Beekeeper Full Name *</label>
+          <input type="text" name="name" placeholder="e.g. Markus Zenhäusern" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Apiary / Farm Name *</label>
+          <input type="text" name="apiary_name" placeholder="e.g. Valais High Meadow Apiary" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Location / Region *</label>
+          <input type="text" name="location" placeholder="e.g. Valais Alps, Switzerland" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Hive Count</label>
+            <input type="number" name="hives_count" value="50" min="1" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Contact Phone</label>
+            <input type="text" name="phone" placeholder="+41 27 000 0000" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Honey Varieties</label>
+          <input type="text" name="honey_varieties" placeholder="e.g. Alpine Blossom, Rhododendron" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 10px; font-size: 0.92rem;">
+          <i class="fa-solid fa-save"></i> Save Beekeeper
+        </button>
+      </form>
+    </div>
+
+    <!-- Registered Beekeepers Table -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #F4B400; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-users"></i> Registered Apiaries &amp; Beekeepers
+      </h3>
+
+      {% if beekeepers and beekeepers|length > 0 %}
+        <div style="overflow-x: auto;">
+          <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <thead>
+              <tr style="background: #2A1F18; color: #F4B400; text-align: left; border-bottom: 2px solid #4A2C16;">
+                <th style="padding: 10px;">ID</th>
+                <th style="padding: 10px;">Beekeeper</th>
+                <th style="padding: 10px;">Apiary Name</th>
+                <th style="padding: 10px;">Location</th>
+                <th style="padding: 10px;">Hives</th>
+                <th style="padding: 10px;">Varieties</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for bk in beekeepers %}
+                <tr style="border-bottom: 1px solid #2E2017;">
+                  <td style="padding: 10px; color: #F4B400; font-weight: 700;">{{ bk.beekeeper_id }}</td>
+                  <td style="padding: 10px; color: #FFF8E7; font-weight: 600;">{{ bk.name }}</td>
+                  <td style="padding: 10px; color: #D1D5DB;">{{ bk.apiary_name }}</td>
+                  <td style="padding: 10px; color: #9CA3AF;">{{ bk.location }}</td>
+                  <td style="padding: 10px; color: #10B981;">{{ bk.hives_count }}</td>
+                  <td style="padding: 10px; color: #9CA3AF;">{{ bk.honey_varieties }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 40px 20px; color: #9CA3AF;">
+          <div style="font-size: 2.5rem; color: #F4B400; margin-bottom: 10px;">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <h4 style="font-size: 1.05rem; color: #FFF8E7; margin: 0 0 6px 0; font-weight: 700;">
+            No records found. Add a new record to get started.
+          </h4>
+          <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">
+            Register your first apiary or beekeeper in the form on the left.
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Stage 1 Harvest Batches Table -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #3E291B; padding-bottom: 10px;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #F4B400; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-boxes-stacked"></i> Honey Harvest Batches (Block 1 Ledger)
+      </h3>
+      <a href="{{ url_for('create_batch') }}" style="color: #F4B400; font-size: 0.85rem; text-decoration: none; font-weight: 600;">
+        + Record Harvest
+      </a>
+    </div>
+
+    {% if batches and batches|length > 0 %}
+      <div style="overflow-x: auto;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="background: #2A1F18; color: #F4B400; text-align: left; border-bottom: 2px solid #4A2C16;">
+              <th style="padding: 10px;">Batch ID</th>
+              <th style="padding: 10px;">Product Name</th>
+              <th style="padding: 10px;">Beekeeper</th>
+              <th style="padding: 10px;">Harvest Date</th>
+              <th style="padding: 10px;">Quantity</th>
+              <th style="padding: 10px;">Stage</th>
+              <th style="padding: 10px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in batches %}
+              <tr style="border-bottom: 1px solid #2E2017;">
+                <td style="padding: 10px; font-weight: 700; color: #F4B400;">{{ b.batch_id }}</td>
+                <td style="padding: 10px; color: #FFF8E7;">{{ b.product_name }}</td>
+                <td style="padding: 10px; color: #D1D5DB;">{{ b.beekeeper_name }}</td>
+                <td style="padding: 10px; color: #9CA3AF;">{{ b.harvest_date }}</td>
+                <td style="padding: 10px; color: #FFF8E7;">{{ b.quantity_kg }} kg</td>
+                <td style="padding: 10px;">
+                  <span style="background: rgba(244, 180, 0, 0.15); color: #F4B400; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                    Stage {{ b.stage_num }}
+                  </span>
+                </td>
+                <td style="padding: 10px; text-align: right;">
+                  <a href="{{ url_for('batch_details', batch_id=b.batch_id) }}" class="btn-sm" style="background: #251B14; color: #FFF8E7; border: 1px solid #4A2C16; padding: 4px 8px; border-radius: 6px; text-decoration: none; font-size: 0.78rem;">
+                    Details
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 40px 20px; color: #9CA3AF;">
+        <h4 style="font-size: 1.05rem; color: #FFF8E7; margin: 0 0 6px 0; font-weight: 700;">
+          No records found. Add a new record to get started.
+        </h4>
+        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">
+          No honey batches have been registered yet. Click below to create your first batch.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

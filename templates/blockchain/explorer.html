@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Blockchain Ledger Explorer — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="blockchain-explorer-page" style="max-width: 1400px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+        <i class="fa-solid fa-link"></i> SHA-256 Blockchain Ledger Explorer
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        Immutable cryptographic chain of custody. Proof-of-work difficulty target: 2 leading zeros.
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      {% if is_chain_valid %}
+        <span style="background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1.5px solid #10B981; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-circle-check"></i> Ledger Valid (100% Intact)
+        </span>
+      {% else %}
+        <span style="background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1.5px solid #EF4444; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Tampering Detected!
+        </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Chain Statistics Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 18px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Total Blocks Mined</span>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #F4B400; margin-top: 4px;">{{ chain|length }}</div>
+    </div>
+
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 18px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Consensus Mechanism</span>
+      <div style="font-size: 1.1rem; font-weight: 700; color: #FFF8E7; margin-top: 8px;">Proof of Work (PoW)</div>
+    </div>
+
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 18px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Hashing Algorithm</span>
+      <div style="font-size: 1.1rem; font-weight: 700; color: #10B981; margin-top: 8px;">SHA-256 (256-bit)</div>
+    </div>
+
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 18px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Mining Difficulty</span>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #3B82F6; margin-top: 4px;">{{ difficulty }} zeros</div>
+    </div>
+  </div>
+
+  <!-- Blocks List in Reverse Order -->
+  <div style="display: flex; flex-direction: column; gap: 18px;">
+    {% for block in chain|reverse %}
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px; position: relative;">
+        
+        <!-- Block Top Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3E291B; padding-bottom: 12px; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="background: #F4B400; color: #4A2C16; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;">
+              Block #{{ block.index }}
+            </span>
+            <span style="font-weight: 700; color: #FFF8E7; font-size: 1rem;">
+              {{ block.block_type }}
+            </span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="color: #9CA3AF; font-size: 0.82rem;">
+              <i class="fa-regular fa-clock"></i> {{ block.timestamp }}
+            </span>
+            <a href="{{ url_for('block_details', block_index=block.index) }}" class="btn-sm" style="background: #251B14; color: #F4B400; border: 1px solid #4A2C16; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem;">
+              View JSON &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- Hash and Cryptographic Details -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 14px; margin-bottom: 14px; font-size: 0.82rem;">
+          <div>
+            <strong style="color: #9CA3AF; display: block; margin-bottom: 4px;">Block Cryptographic Hash:</strong>
+            <code style="display: block; background: #251B14; padding: 6px 10px; border-radius: 6px; color: #10B981; word-break: break-all;">
+              {{ block.hash }}
+            </code>
+          </div>
+
+          <div>
+            <strong style="color: #9CA3AF; display: block; margin-bottom: 4px;">Previous Block Hash:</strong>
+            <code style="display: block; background: #251B14; padding: 6px 10px; border-radius: 6px; color: #9CA3AF; word-break: break-all;">
+              {{ block.previous_hash }}
+            </code>
+          </div>
+
+          <div>
+            <strong style="color: #9CA3AF; display: block; margin-bottom: 4px;">Nonce (PoW):</strong>
+            <div style="background: #251B14; padding: 6px 10px; border-radius: 6px; color: #F4B400; font-weight: 700; text-align: center;">
+              {{ block.nonce }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Payload Preview -->
+        <div style="background: #140E0A; border-radius: 8px; padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #D1D5DB; overflow-x: auto;">
+          <strong style="color: #F4B400; display: block; margin-bottom: 4px; font-family: sans-serif;">Payload Summary:</strong>
+          {% if block.data is mapping %}
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+              {% for k, v in block.data.items() %}
+                <div><span style="color: #9CA3AF;">{{ k }}:</span> <span style="color: #FFF8E7;">{{ v }}</span></div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div>{{ block.data }}</div>
+          {% endif %}
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+

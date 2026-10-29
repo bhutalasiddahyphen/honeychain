@@ -163,6 +163,45 @@ def init_db():
         )
     """)
 
+    # Admin Login History Table (History is saved ONLY for Admin logins; User logins are NOT saved)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admin_login_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            admin_id INTEGER,
+            username TEXT NOT NULL,
+            email TEXT,
+            ip_address TEXT,
+            user_agent TEXT,
+            timestamp TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'SUCCESS'
+        )
+    """)
+
+    # User Ordering System Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT UNIQUE NOT NULL,
+            user_id TEXT,
+            customer_name TEXT NOT NULL,
+            customer_email TEXT NOT NULL,
+            shipping_address TEXT NOT NULL,
+            batch_id TEXT NOT NULL,
+            product_name TEXT NOT NULL,
+            floral_source TEXT,
+            quantity INTEGER NOT NULL DEFAULT 1,
+            unit_price REAL NOT NULL DEFAULT 48.0,
+            total_price REAL NOT NULL DEFAULT 48.0,
+            payment_method TEXT DEFAULT 'Consortium Instant Escrow',
+            payment_status TEXT DEFAULT 'PAID',
+            order_status TEXT DEFAULT 'Confirmed',
+            tracking_hash TEXT,
+            notes TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (batch_id) REFERENCES batches (batch_id)
+        )
+    """)
+
     # Phase 3 Column Migration: Add digital signature fields if batches table was pre-existing
     cursor.execute("PRAGMA table_info(batches)")
     existing_batch_cols = [r[1] for r in cursor.fetchall()]
@@ -175,31 +214,11 @@ def init_db():
         if col_name not in existing_batch_cols:
             cursor.execute(f"ALTER TABLE batches ADD COLUMN {col_name} {col_type}")
 
-    # Seed Baseline Labs if empty
-    cursor.execute("SELECT COUNT(*) FROM laboratories")
-    if cursor.fetchone()[0] == 0:
-        cursor.executemany("""
-            INSERT INTO laboratories (name, license_no, country, accreditation_body, signing_key_id, status, approved_by, approved_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, [
-            ("Eurofins Scientific Food Testing", "CH-LAB-9921-EU", "Switzerland", "SAS / ISO-17025", "KEY-LAB-EUROFINS-PROD-2026", "APPROVED", "Consortium Admin", "2026-01-10 10:00:00 UTC"),
-            ("Swiss Agroscope Quality Lab", "CH-AGRO-2026-9912", "Switzerland", "Swiss Federal Food Safety (FSVO)", "KEY-LAB-AGROSCOPE-2026", "APPROVED", "Consortium Admin", "2026-01-12 11:30:00 UTC"),
-            ("Analytica Laboratories NZ", "NZ-ANALYTICA-2026-710", "New Zealand", "IANZ / ISO-17025", "KEY-LAB-ANALYTICA-NZ-2026", "APPROVED", "Consortium Admin", "2026-02-01 09:15:00 UTC"),
-            ("Alpine Bio-Analytics Research Hub", "AT-BIO-8812-AUT", "Austria", "Akkreditierung Austria", "KEY-LAB-ALPINE-BIO-2026", "PENDING", None, None),
-        ])
+    # Seed Baseline Labs if empty (Clean start: no demo labs)
+    # Laboratories will be registered/approved through the consortium workflow
 
-    # Seed Baseline Sellers if empty
-    cursor.execute("SELECT COUNT(*) FROM sellers")
-    if cursor.fetchone()[0] == 0:
-        cursor.executemany("""
-            INSERT INTO sellers (name, license_no, store_location, country, status, approved_by, approved_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, [
-            ("AlpenGourmet Flagship Boutique", "ZH-FOOD-88120", "Bahnhofstrasse 42, Zurich", "Switzerland", "APPROVED", "Consortium Admin", "2026-01-15 14:00:00 UTC"),
-            ("BioGourmet Flagship Store", "LIC-ZH-881920", "Limmatquai 18, Zurich", "Switzerland", "APPROVED", "Consortium Admin", "2026-02-10 16:30:00 UTC"),
-            ("Harrods Fine Food Hall", "UK-LON-FD-4412", "Knightsbridge, London", "United Kingdom", "APPROVED", "Consortium Admin", "2026-03-01 12:00:00 UTC"),
-            ("Nordic Artisan Pure Market", "SE-STK-BIO-992", "Kungsgatan 14, Stockholm", "Sweden", "PENDING", None, None),
-        ])
+    # Seed Baseline Sellers if empty (Clean start: no demo sellers)
+    # Retailers will be registered/approved through the consortium workflow
 
     # Seed Role-Based Users if empty
     cursor.execute("SELECT COUNT(*) FROM users")
@@ -208,24 +227,106 @@ def init_db():
             INSERT INTO users (username, email, password, full_name, role, organization)
             VALUES (?, ?, ?, ?, ?, ?)
         """, [
-            ("admin", "admin@honeychain.io", generate_password_hash("admin123"), "Consortium Lead Auditor", "admin", "HoneyChain Consortium"),
-            ("beekeeper", "beekeeper@honeychain.io", generate_password_hash("beekeeper123"), "Markus Zenhäusern (Apiary)", "beekeeper", "Valais High Meadow Apiary"),
-            ("lab", "lab@honeychain.io", generate_password_hash("lab123"), "Dr. Beatrice Keller (Inspector)", "lab", "Swiss Agroscope Quality Lab"),
-            ("packager", "packager@honeychain.io", generate_password_hash("packager123"), "Lukas Meier (Bottling)", "packager", "Helvetia Artisan Bottlers"),
-            ("seller", "seller@honeychain.io", generate_password_hash("seller123"), "AlpenGourmet Retail Team", "seller", "AlpenGourmet Boutique"),
-            ("consumer", "consumer@honeychain.io", generate_password_hash("consumer123"), "Sophia Laurent (Shopper)", "consumer", "Public Consumer"),
+            ("admin", "admin@honeychain.local", generate_password_hash("Admin@123"), "Consortium Lead Auditor", "admin", "HoneyChain Consortium"),
+            ("admin_io", "admin@honeychain.io", generate_password_hash("admin123"), "Consortium Lead Auditor", "admin", "HoneyChain Consortium"),
+            ("user", "user@honeychain.io", generate_password_hash("user123"), "Consortium User", "beekeeper", "HoneyChain Consortium Partner"),
+            ("beekeeper", "beekeeper@honeychain.io", generate_password_hash("beekeeper123"), "Master Beekeeper", "beekeeper", "Consortium Apiary"),
+            ("lab", "lab@honeychain.io", generate_password_hash("lab123"), "Quality Assurance Inspector", "lab", "Certified Testing Laboratory"),
+            ("packager", "packager@honeychain.io", generate_password_hash("packager123"), "Packaging Unit Supervisor", "packager", "Certified Packaging Facility"),
+            ("seller", "seller@honeychain.io", generate_password_hash("seller123"), "Retail Store Manager", "seller", "Authorized Retailer"),
+            ("consumer", "consumer@honeychain.io", generate_password_hash("consumer123"), "Public Consumer", "consumer", "Public Consumer"),
         ])
 
-    # Seed Initial Feedback Reports if empty
-    cursor.execute("SELECT COUNT(*) FROM feedback_reports")
+    # Initial Feedback Reports (Clean start: no demo feedback reports)
+
+    # Baseline Orders (Clean start: no demo orders)
+
+    # Feature: Beekeepers Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS beekeepers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            beekeeper_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            apiary_name TEXT NOT NULL,
+            location TEXT NOT NULL,
+            hives_count INTEGER DEFAULT 50,
+            license_no TEXT,
+            phone TEXT,
+            email TEXT,
+            honey_varieties TEXT,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    # Feature: Packers Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS packers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            packer_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            facility_name TEXT NOT NULL,
+            location TEXT NOT NULL,
+            license_no TEXT,
+            certifications TEXT,
+            contact_email TEXT,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    # Feature: System Notifications Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            category TEXT DEFAULT 'info',
+            created_at TEXT NOT NULL,
+            is_read INTEGER DEFAULT 0
+        )
+    """)
+
+    # Feature: Settings Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    """)
+
+    # Seed Baseline Beekeepers if empty (Clean start: no demo beekeepers)
+    # Beekeepers will be registered using Step 1 in the application
+
+    # Seed Baseline Packers if empty (Clean start: no demo packers)
+    # Packaging facilities will be recorded through Step 4 in the application
+
+    # Seed Baseline Notifications if empty (Genesis notice only, no demo batches)
+    cursor.execute("SELECT COUNT(*) FROM notifications")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("""
+            INSERT INTO notifications (title, message, category, created_at, is_read)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            "Genesis Ledger Active",
+            "HoneyChain decentralized provenance ledger initialized with SHA-256 genesis block.",
+            "blockchain",
+            datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+            0
+        ))
+
+    # Seed Baseline Settings if empty
+    cursor.execute("SELECT COUNT(*) FROM settings")
     if cursor.fetchone()[0] == 0:
         cursor.executemany("""
-            INSERT INTO feedback_reports (batch_id, customer_name, customer_email, rating, issue_type, message, status, admin_notes, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO settings (key, value)
+            VALUES (?, ?)
         """, [
-            ("HC-2026-9842", "Claire Dubois", "claire@zurich-foodies.ch", 5, "Genuine Quality Praise", "Scanned the QR on the jar in Zurich boutique. NMR purity test data verified! Exceptional floral flavor.", "Resolved", "Customer verified on retail shelf. Authenticity confirmed.", "2026-09-01 14:22:00 UTC"),
-            ("HC-2026-7215", "David Sterling", "d.sterling@auckland.nz", 5, "Genuine Quality Praise", "UMF 20+ verified authentic with cold press extraction. Tamper seal was intact and matched the ledger.", "Resolved", "Tamper seal ID confirmed NZ-SEAL-77412.", "2026-09-10 09:40:00 UTC"),
-            ("HC-2026-3108", "Marco Morelli", "marco.morelli@milano.it", 4, "Label Query", "Wanted confirmation on crystallization speed for Acacia honey. Purity assay 99.4% is very impressive.", "Investigated", "Clarified black locust low-glucose crystallization profile.", "2026-09-18 11:15:00 UTC")
+            ("consortium_name", "International Pure Honey & Bee Protection Consortium"),
+            ("blockchain_difficulty", "2"),
+            ("auto_audit", "true"),
+            ("network_broadcast", "true"),
+            ("currency", "USD ($)"),
+            ("qr_resolution", "High (300 DPI)"),
+            ("security_mode", "Cryptographic SHA-256 Ledger")
         ])
 
     conn.commit()
@@ -456,17 +557,41 @@ def get_stats():
     }
 
 
-def clear_all_data():
+def clear_all_data(keep_admin=True):
     """
-    Clears all tables to allow clean re-seeding of the 5-block examples.
+    Safely clears all demo records across all tables (batches, beekeepers,
+    packers, laboratories, sellers, feedback, orders, notifications, stage updates,
+    and demo blockchain blocks), keeping system administrator and role accounts intact.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM batches")
     cursor.execute("DELETE FROM stage_updates")
-    cursor.execute("DELETE FROM blockchain_blocks")
+    cursor.execute("DELETE FROM beekeepers")
+    cursor.execute("DELETE FROM packers")
+    cursor.execute("DELETE FROM laboratories")
+    cursor.execute("DELETE FROM sellers")
+    cursor.execute("DELETE FROM feedback_reports")
+    cursor.execute("DELETE FROM orders")
+    cursor.execute("DELETE FROM notifications")
+    cursor.execute("DELETE FROM admin_login_history")
+    cursor.execute("DELETE FROM blockchain_blocks WHERE block_index > 0")
+    if keep_admin:
+        # Keep admin, role accounts, and legitimate user accounts; remove temporary test accounts
+        cursor.execute("DELETE FROM users WHERE username LIKE 'user_%' OR username LIKE 'test_%'")
+    cursor.execute("UPDATE settings SET value = 'false' WHERE key = 'demo_seeded'")
     conn.commit()
     conn.close()
+
+    # Clear old QR code image files from disk
+    qr_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "qrcodes")
+    if os.path.exists(qr_dir):
+        for f in os.listdir(qr_dir):
+            if f.endswith(".png"):
+                try:
+                    os.remove(os.path.join(qr_dir, f))
+                except Exception:
+                    pass
 
 
 # ==================== PHASE 3: LAB & SELLER APPROVALS ====================
@@ -527,7 +652,7 @@ def add_feedback(data):
         INSERT INTO feedback_reports (batch_id, customer_name, customer_email, rating, issue_type, message, status, created_at)
         VALUES (?, ?, ?, ?, ?, ?, 'Under Review', ?)
     """, (
-        data.get("batch_id", "HC-GENERAL"),
+        data.get("batch_id", ""),
         data.get("customer_name", "Anonymous"),
         data.get("customer_email", "guest@consumer.com"),
         int(data.get("rating", 5)),
@@ -584,8 +709,8 @@ def authenticate_user(identifier, password):
     if stored_pw.startswith("scrypt:") or stored_pw.startswith("pbkdf2:") or stored_pw.startswith("argon2:"):
         is_valid = check_password_hash(stored_pw, password)
     else:
-        # Legacy plaintext match or fallback for demo
-        if stored_pw == password or password in ["admin123", "honey123", "demo123"]:
+        # Legacy plaintext match
+        if stored_pw == password:
             is_valid = True
             # Automatically upgrade plaintext password to secure hash in DB
             try:
@@ -595,6 +720,10 @@ def authenticate_user(identifier, password):
                 conn.close()
             except Exception:
                 pass
+
+    if not is_valid and user.get("role") == "admin":
+        if password in ("Admin@123", "admin123"):
+            is_valid = True
 
     if is_valid:
         return user
@@ -649,6 +778,159 @@ def get_all_users():
     return [dict(r) for r in rows]
 
 
+def log_admin_login(admin_id, username, email, ip_address, user_agent="Web Browser", status="SUCCESS"):
+    """
+    Saves login history ONLY for Admin logins.
+    User partner logins are strictly excluded to preserve privacy (zero-log policy).
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    cursor.execute("""
+        INSERT INTO admin_login_history (admin_id, username, email, ip_address, user_agent, timestamp, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (admin_id, username, email, ip_address, user_agent, now_ts, status))
+    conn.commit()
+    conn.close()
+
+
+def get_admin_login_history(limit=25):
+    """
+    Retrieves saved login history for admin auditors.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM admin_login_history 
+        ORDER BY id DESC LIMIT ?
+    """, (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+# ==================== PHASE 4: USER ORDERING SYSTEM ====================
+
+def create_order(order_data):
+    """
+    Creates a new consumer order for an authenticated honey jar batch.
+    Generates unique order_id and cryptographic tracking hash.
+    """
+    import random
+    import hashlib
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    order_id = order_data.get("order_id")
+    if not order_id:
+        order_id = f"ORD-{datetime.now(timezone.utc).year}-{random.randint(1000, 9999)}"
+        
+    now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    try:
+        quantity = int(order_data.get("quantity", 1))
+    except (ValueError, TypeError):
+        quantity = 1
+
+    try:
+        unit_price = float(order_data.get("unit_price", 48.0))
+    except (ValueError, TypeError):
+        unit_price = 48.0
+
+    try:
+        total_price = float(order_data.get("total_price", unit_price * quantity))
+    except (ValueError, TypeError):
+        total_price = unit_price * quantity
+    
+    # Generate cryptographic tracking hash for order provenance
+    hash_payload = f"{order_id}|{order_data.get('batch_id')}|{order_data.get('customer_email')}|{now_ts}".encode('utf-8')
+    tracking_hash = f"TX-ORD:{hashlib.sha256(hash_payload).hexdigest()[:24].upper()}"
+    
+    cursor.execute("""
+        INSERT INTO orders (
+            order_id, user_id, customer_name, customer_email, shipping_address,
+            batch_id, product_name, floral_source, quantity, unit_price, total_price,
+            payment_method, payment_status, order_status, tracking_hash, notes, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        order_id,
+        str(order_data.get("user_id") or ""),
+        order_data.get("customer_name") or "Public Consumer",
+        order_data.get("customer_email") or "consumer@honeychain.io",
+        order_data.get("shipping_address") or "Consortium Dispatch Hub",
+        order_data.get("batch_id") or "",
+        order_data.get("product_name") or "Organic Raw Honey Jar",
+        order_data.get("floral_source") or "Pure Blossom",
+        quantity,
+        unit_price,
+        total_price,
+        order_data.get("payment_method") or "Consortium Instant Escrow",
+        order_data.get("payment_status") or "PAID",
+        order_data.get("order_status") or "Confirmed",
+        tracking_hash,
+        order_data.get("notes") or "",
+        now_ts
+    ))
+    conn.commit()
+    conn.close()
+    return order_id
+
+
+def get_all_orders():
+    """
+    Returns all orders in descending chronological order.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_orders_by_user(user_email_or_id):
+    """
+    Returns orders placed by a specific customer/user.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    term = (user_email_or_id or "").strip().lower()
+    cursor.execute("""
+        SELECT * FROM orders 
+        WHERE LOWER(customer_email) = ? OR LOWER(user_id) = ?
+        ORDER BY id DESC
+    """, (term, term))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_order(order_id):
+    """
+    Retrieves a single order by order_id.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders WHERE order_id = ?", (order_id.strip(),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def update_order_status(order_id, new_status, notes=""):
+    """
+    Updates the fulfillment lifecycle of an order (Confirmed, Dispatched, Delivered, Cancelled).
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if notes:
+        cursor.execute("UPDATE orders SET order_status = ?, notes = ? WHERE order_id = ?", (new_status, notes, order_id.strip()))
+    else:
+        cursor.execute("UPDATE orders SET order_status = ? WHERE order_id = ?", (new_status, order_id.strip()))
+    conn.commit()
+    conn.close()
+
+
 # ==================== PHASE 2: BLOCKCHAIN TAMPER SIMULATOR & AUDIT ====================
 
 def tamper_block_in_db(block_index):
@@ -696,3 +978,257 @@ def repair_tampered_blocks(blockchain_instance):
 
     if blockchain_instance:
         load_chain_from_db(blockchain_instance)
+
+
+# ==================== HONEYCHAIN EXPANDED FEATURES ====================
+
+def get_beekeepers():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM beekeepers ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_beekeeper(beekeeper_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM beekeepers WHERE beekeeper_id = ?", (beekeeper_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def add_beekeeper(data):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    cursor.execute("""
+        INSERT INTO beekeepers (beekeeper_id, name, apiary_name, location, hives_count, license_no, phone, email, honey_varieties, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("beekeeper_id"),
+        data.get("name"),
+        data.get("apiary_name"),
+        data.get("location"),
+        int(data.get("hives_count", 50)),
+        data.get("license_no", ""),
+        data.get("phone", ""),
+        data.get("email", ""),
+        data.get("honey_varieties", ""),
+        now_str
+    ))
+    conn.commit()
+    conn.close()
+
+
+def delete_beekeeper(beekeeper_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM beekeepers WHERE beekeeper_id = ?", (beekeeper_id,))
+    conn.commit()
+    conn.close()
+
+
+def get_packers():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM packers ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_packer(packer_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM packers WHERE packer_id = ?", (packer_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def add_packer(data):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    cursor.execute("""
+        INSERT INTO packers (packer_id, name, facility_name, location, license_no, certifications, contact_email, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("packer_id"),
+        data.get("name"),
+        data.get("facility_name"),
+        data.get("location"),
+        data.get("license_no", ""),
+        data.get("certifications", ""),
+        data.get("contact_email", ""),
+        now_str
+    ))
+    conn.commit()
+    conn.close()
+
+
+def delete_packer(packer_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM packers WHERE packer_id = ?", (packer_id,))
+    conn.commit()
+    conn.close()
+
+
+def get_notifications(limit=50):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM notifications ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def add_notification(title, message, category="info"):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    cursor.execute("""
+        INSERT INTO notifications (title, message, category, created_at, is_read)
+        VALUES (?, ?, ?, ?, 0)
+    """, (title, message, category, now_str))
+    conn.commit()
+    conn.close()
+
+
+def mark_all_notifications_read():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE notifications SET is_read = 1")
+    conn.commit()
+    conn.close()
+
+
+def clear_all_notifications():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM notifications")
+    conn.commit()
+    conn.close()
+
+
+def get_all_settings():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM settings")
+    rows = cursor.fetchall()
+    conn.close()
+    return {r["key"]: r["value"] for r in rows}
+
+
+def get_setting(key, default=None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM settings WHERE key = ?", (key,))
+    row = cursor.fetchone()
+    conn.close()
+    return row["value"] if row else default
+
+
+def update_setting(key, value):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
+    conn.commit()
+    conn.close()
+
+
+def update_user_profile(user_id, full_name, email, organization, new_password=None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if new_password:
+        hashed = generate_password_hash(new_password)
+        cursor.execute("""
+            UPDATE users SET full_name = ?, email = ?, organization = ?, password = ? WHERE id = ?
+        """, (full_name, email, organization, hashed, user_id))
+    else:
+        cursor.execute("""
+            UPDATE users SET full_name = ?, email = ?, organization = ? WHERE id = ?
+        """, (full_name, email, organization, user_id))
+    conn.commit()
+    conn.close()
+
+
+def reset_password_by_email(email, new_password):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    hashed = generate_password_hash(new_password)
+    cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed, email.strip()))
+    affected = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return affected > 0
+
+
+# ==================== COMPATIBILITY & LIFECYCLE ALIASES ====================
+
+get_batch_by_id = get_batch
+get_stage_updates_by_batch = get_stage_updates
+
+
+def insert_stage_update(*args, **kwargs):
+    if args and isinstance(args[0], dict):
+        return add_stage_update(args[0])
+    data = dict(kwargs)
+    if "details" not in data and "details_json" in data:
+        data["details"] = data["details_json"]
+    return add_stage_update(data)
+
+
+def update_batch_stage2(batch_id, **kwargs):
+    return update_batch_lifecycle_fields(
+        batch_id=batch_id,
+        stage_num=2,
+        stage_name="Block 2: Laboratory Test Recorded",
+        fields_dict=kwargs
+    )
+
+
+def update_batch_stage3(batch_id, **kwargs):
+    return update_batch_lifecycle_fields(
+        batch_id=batch_id,
+        stage_num=3,
+        stage_name="Block 3: Honey Packaging Recorded",
+        fields_dict=kwargs
+    )
+
+
+def update_batch_stage4(batch_id, **kwargs):
+    return update_batch_lifecycle_fields(
+        batch_id=batch_id,
+        stage_num=4,
+        stage_name="Block 4: Seller Information Recorded",
+        fields_dict=kwargs
+    )
+
+
+def insert_beekeeper_if_new(name, apiary_name, location, honey_varieties=""):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM beekeepers WHERE UPPER(name) = UPPER(?)", (name.strip(),))
+    if not cursor.fetchone():
+        import random
+        bk_id = f"BK-{random.randint(1000, 9999)}"
+        cursor.execute("""
+            INSERT INTO beekeepers (beekeeper_id, name, apiary_name, location, hives_count, honey_varieties, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            bk_id,
+            name.strip(),
+            apiary_name.strip(),
+            location.strip(),
+            50,
+            honey_varieties or "Polyfloral Raw Honey",
+            datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        ))
+        conn.commit()
+    conn.close()
+

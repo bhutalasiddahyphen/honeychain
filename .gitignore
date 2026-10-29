@@ -16,8 +16,14 @@ ENV/
 
 # Database files (ephemeral local storage)
 instance/*.db
+instance/*.db*
+instance/*.bak
 *.sqlite
 *.sqlite3
+
+# Ephemeral runtime QR codes
+static/qrcodes/*.png
+!static/qrcodes/.gitkeep
 
 # IDE and OS files
 .vscode/

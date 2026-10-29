@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Scan QR Code — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="qr-scanner-page" style="max-width: 800px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Page Header -->
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+      <i class="fa-solid fa-camera"></i> Live Camera QR Code Scanner
+    </h1>
+    <p style="margin: 6px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+      Point your device camera at a HoneyChain product QR code to instantly verify authenticity.
+    </p>
+  </div>
+
+  <!-- Status / Alert Area -->
+  <div id="scannerStatus" class="alert-message alert-info" style="display: none; margin-bottom: 18px;">
+    Ready to scan.
+  </div>
+
+  <!-- Camera Live Viewfinder Card -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 24px;">
+    
+    <!-- Camera Selection Controls -->
+    <div style="display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 18px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-video" style="color: #F4B400;"></i>
+        <select id="cameraSelect" style="padding: 8px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem;">
+          <option value="">Default Camera</option>
+        </select>
+      </div>
+
+      <button type="button" id="startCameraBtn" class="btn-primary" style="width: auto; padding: 9px 20px; font-size: 0.9rem;">
+        <i class="fa-solid fa-play"></i> Start Camera
+      </button>
+
+      <button type="button" id="stopCameraBtn" class="btn-secondary" style="width: auto; padding: 9px 20px; font-size: 0.9rem; display: none; background: #7F1D1D; border: 1px solid #991B1B; color: #FFF8E7;">
+        <i class="fa-solid fa-stop"></i> Stop Camera
+      </button>
+    </div>
+
+    <!-- Video Feed Container with Scanning Frame Overlay -->
+    <div style="position: relative; width: 100%; max-width: 480px; height: 360px; margin: 0 auto; background: #120D0A; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px dashed #4A2C16;">
+      
+      <video id="qrVideo" playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+      <canvas id="qrCanvas" style="display: none;"></canvas>
+
+      <!-- Target Box / Frame Overlay -->
+      <div id="scanOverlay" style="display: none; position: absolute; width: 220px; height: 220px; border: 3px solid #F4B400; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45); pointer-events: none;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #F4B400; animation: scanLine 2s infinite ease-in-out;"></div>
+      </div>
+
+      <!-- Idle Camera Placeholder -->
+      <div id="cameraIdle" style="color: #6B7280; font-size: 0.9rem;">
+        <i class="fa-solid fa-camera-retro" style="font-size: 3rem; color: #4A2C16; display: block; margin-bottom: 10px;"></i>
+        Camera is offline. Click <strong>Start Camera</strong> above.
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Batch ID Fallback Input Card -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+    <h3 style="margin: 0 0 10px 0; font-size: 1.05rem; font-weight: 700; color: #F4B400; display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-keyboard"></i> Camera Unavailable? Enter Batch ID Manually
+    </h3>
+    <p style="margin: 0 0 16px 0; color: #9CA3AF; font-size: 0.85rem;">
+      If camera permission is blocked or your device does not have a webcam, type the Batch ID from your honey jar label.
+    </p>
+
+    <form action="{{ url_for('trace_route') }}" method="GET" style="display: flex; gap: 10px;" onsubmit="event.preventDefault(); const id = document.getElementById('manualBatchInput').value.trim(); if(id) window.location.href='/trace/' + encodeURIComponent(id);">
+      <input 
+        type="text" 
+        id="manualBatchInput" 
+        placeholder="Enter Batch ID (e.g. HC-2026-1001)" 
+        required 
+        style="flex: 1; padding: 11px 14px; background: #251B14; border: 1px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.92rem; outline: none;"
+      >
+      <button type="submit" class="btn-primary" style="width: auto; padding: 11px 22px; font-size: 0.92rem;">
+        <i class="fa-solid fa-search"></i> Trace Batch
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<style>
+  @keyframes scanLine {
+    0% { top: 0; }
+    50% { top: 100%; }
+    100% { top: 0; }
+  }
+</style>
+
+<script src="{{ url_for('static', filename='js/qr-scanner.js') }}"></script>
+{% endblock %}
+

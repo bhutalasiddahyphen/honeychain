@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Stage 3: Packaging &amp; Bottling — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="stage-page" style="max-width: 1400px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #8B5CF6;">
+        <i class="fa-solid fa-box-open"></i> Stage 3: Packaging &amp; Tamper Sealing
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        Record bottling facility operations, assign tamper-evident seals, and generate consumer QR codes into Block 3.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 28px;">
+    
+    <!-- Packaging Entry Form Card -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #8B5CF6; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-box-archive"></i> Record Packaging Run
+      </h3>
+
+      <form action="{{ url_for('stages_packer') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+
+        <!-- Select Batch ID -->
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Select Lab-Tested Batch *</label>
+          <select name="batch_id" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #F4B400; font-weight: 700; font-size: 0.88rem; box-sizing: border-box;">
+            <option value="">-- Choose Batch Awaiting Packaging --</option>
+            {% for b in pending_batches %}
+              <option value="{{ b.batch_id }}" {% if selected_batch_id == b.batch_id %}selected{% endif %}>
+                {{ b.batch_id }} &mdash; {{ b.product_name }} ({{ b.purity_score }}% Pure)
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Packaging Facility / Plant *</label>
+          <input type="text" name="packaging_plant" placeholder="e.g. Helvetia Artisan Bottlers Ltd." required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Supervisor Name *</label>
+          <input type="text" name="packaging_supervisor" placeholder="e.g. Lukas Meier" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Container / Jar Type *</label>
+            <select name="jar_format" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+              <option value="500g Hexagonal Glass Jar">500g Hexagonal Glass Jar</option>
+              <option value="250g Artisan Glass Hex Jar">250g Artisan Glass Hex Jar</option>
+              <option value="1kg Bulk Honey Pail">1kg Bulk Honey Pail</option>
+              <option value="350g Squeeze Dispenser">350g Squeeze Dispenser</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Net Weight *</label>
+            <input type="text" name="net_weight" value="500g (± 2g)" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Tamper-Seal ID *</label>
+            <input type="text" name="tamper_seal_id" placeholder="e.g. SEAL-CH-2026-9842" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #10B981; font-weight: 700; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Lot / Batch Number *</label>
+            <input type="text" name="lot_number" placeholder="e.g. LOT-2026-CH-09B" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Packaging Date</label>
+          <input type="date" name="packaging_date" value="{{ today_date }}" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 10px; font-size: 0.92rem; background: #8B5CF6; border: none;">
+          <i class="fa-solid fa-cube"></i> Mine Block 3 &amp; Generate QR
+        </button>
+      </form>
+    </div>
+
+    <!-- Packaged Batches Table -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #8B5CF6; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-box"></i> Packaged &amp; QR Tagged Batches (Block 3 Ledger)
+      </h3>
+
+      {% if packaged_batches and packaged_batches|length > 0 %}
+        <div style="overflow-x: auto;">
+          <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <thead>
+              <tr style="background: #2A1F18; color: #8B5CF6; text-align: left; border-bottom: 2px solid #4A2C16;">
+                <th style="padding: 10px;">Batch ID</th>
+                <th style="padding: 10px;">Plant &amp; Supervisor</th>
+                <th style="padding: 10px;">Container</th>
+                <th style="padding: 10px;">Tamper Seal</th>
+                <th style="padding: 10px;">Lot No</th>
+                <th style="padding: 10px; text-align: right;">QR Code</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in packaged_batches %}
+                <tr style="border-bottom: 1px solid #2E2017;">
+                  <td style="padding: 10px; font-weight: 700; color: #F4B400;">{{ b.batch_id }}</td>
+                  <td style="padding: 10px; color: #FFF8E7;">
+                    <div>{{ b.packaging_plant }}</div>
+                    <div style="font-size: 0.75rem; color: #9CA3AF;">{{ b.packaging_supervisor }}</div>
+                  </td>
+                  <td style="padding: 10px; color: #D1D5DB;">{{ b.jar_format }}</td>
+                  <td style="padding: 10px; color: #10B981; font-weight: 700;">{{ b.tamper_seal_id }}</td>
+                  <td style="padding: 10px; color: #FFF8E7;">{{ b.lot_number }}</td>
+                  <td style="padding: 10px; text-align: right;">
+                    <a href="{{ url_for('qr_generator', batch_id=b.batch_id) }}" class="btn-sm" style="background: #251B14; color: #F4B400; border: 1px solid #4A2C16; padding: 4px 8px; border-radius: 6px; text-decoration: none; font-size: 0.78rem;">
+                      <i class="fa-solid fa-qrcode"></i> View QR
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <!-- Required Clean Empty State -->
+        <div style="text-align: center; padding: 40px 20px; color: #9CA3AF;">
+          <div style="font-size: 2.5rem; color: #8B5CF6; margin-bottom: 10px;">
+            <i class="fa-solid fa-box-open"></i>
+          </div>
+          <h4 style="font-size: 1.05rem; color: #FFF8E7; margin: 0 0 6px 0; font-weight: 700;">
+            No records found. Add a new record to get started.
+          </h4>
+          <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">
+            Complete laboratory quality testing first, then record packaging details here.
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

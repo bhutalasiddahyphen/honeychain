@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Batch {{ batch.batch_id }} — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="batch-details-page" style="max-width: 1200px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header & Back Navigation -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <a href="{{ url_for('batches') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Honey Batches
+      </a>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400; display: flex; align-items: center; gap: 10px;">
+        <span>Batch: {{ batch.batch_id }}</span>
+        <span class="badge" style="background: rgba(244, 180, 0, 0.15); color: #F4B400; border: 1px solid #F4B400; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px;">
+          Stage {{ batch.stage_num }}: {{ batch.current_stage }}
+        </span>
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        {{ batch.product_name }} &bull; {{ batch.floral_source }} &bull; Harvested on {{ batch.harvest_date }}
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="{{ url_for('trace_batch', batch_id=batch.batch_id) }}" class="btn-primary" style="width: auto; padding: 9px 18px; font-size: 0.9rem; text-decoration: none;">
+        <i class="fa-solid fa-qrcode"></i> Public Trace View
+      </a>
+      <a href="{{ url_for('qr_generator', batch_id=batch.batch_id) }}" class="btn-secondary" style="width: auto; padding: 9px 16px; font-size: 0.9rem; text-decoration: none; background: #2A1F18; border: 1px solid #4A2C16; color: #FFF8E7;">
+        <i class="fa-solid fa-download"></i> Download QR
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Grid: Left Details & Right QR/Blockchain Meta -->
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 28px;">
+    
+    <!-- Left Column: Stage by Stage Breakdown -->
+    <div>
+      <!-- Stage 1: Apiary Origin -->
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #3E291B; padding-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #F4B400; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-seedling"></i> Stage 1: Beekeeper &amp; Apiary Harvest
+          </h3>
+          <span style="font-size: 0.78rem; color: #10B981; font-weight: 700;">
+            <i class="fa-solid fa-circle-check"></i> Recorded in Block 1
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.88rem;">
+          <div><strong style="color: #9CA3AF;">Beekeeper:</strong> <span style="color: #FFF8E7;">{{ batch.beekeeper_name }}</span></div>
+          <div><strong style="color: #9CA3AF;">Apiary Name:</strong> <span style="color: #FFF8E7;">{{ batch.apiary_name }}</span></div>
+          <div><strong style="color: #9CA3AF;">Origin Location:</strong> <span style="color: #FFF8E7;">{{ batch.origin_location }}</span></div>
+          <div><strong style="color: #9CA3AF;">Harvest Date:</strong> <span style="color: #FFF8E7;">{{ batch.harvest_date }}</span></div>
+          <div><strong style="color: #9CA3AF;">Harvest Quantity:</strong> <span style="color: #FFF8E7;">{{ batch.quantity_kg }} kg</span></div>
+          <div><strong style="color: #9CA3AF;">Extraction:</strong> <span style="color: #FFF8E7;">{{ batch.extraction_method }}</span></div>
+        </div>
+      </div>
+
+      <!-- Stage 2: Laboratory Assay -->
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #3E291B; padding-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #3B82F6; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-flask-vial"></i> Stage 2: Laboratory Quality Assurance
+          </h3>
+          {% if batch.stage_num >= 2 %}
+            <span style="font-size: 0.78rem; color: #10B981; font-weight: 700;">
+              <i class="fa-solid fa-circle-check"></i> Recorded in Block 2
+            </span>
+          {% else %}
+            <a href="{{ url_for('stages_laboratory') }}?batch_id={{ batch.batch_id }}" class="btn-sm" style="background: #3B82F6; color: #FFFFFF; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.78rem; font-weight: 700;">
+              Record Lab Test &rarr;
+            </a>
+          {% endif %}
+        </div>
+
+        {% if batch.stage_num >= 2 %}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.88rem;">
+            <div><strong style="color: #9CA3AF;">Lab Name:</strong> <span style="color: #FFF8E7;">{{ batch.lab_name }}</span></div>
+            <div><strong style="color: #9CA3AF;">Inspector:</strong> <span style="color: #FFF8E7;">{{ batch.inspector_name }}</span></div>
+            <div><strong style="color: #9CA3AF;">Certificate No:</strong> <span style="color: #FFF8E7;">{{ batch.certificate_no }}</span></div>
+            <div><strong style="color: #9CA3AF;">Purity Score:</strong> <span style="color: #10B981; font-weight: 700;">{{ batch.purity_score }}%</span></div>
+            <div><strong style="color: #9CA3AF;">Moisture Content:</strong> <span style="color: #FFF8E7;">{{ batch.moisture_content }}%</span></div>
+            <div><strong style="color: #9CA3AF;">HMF Level:</strong> <span style="color: #FFF8E7;">{{ batch.hmf_level }} mg/kg</span></div>
+            <div style="grid-column: span 2;">
+              <strong style="color: #9CA3AF;">Digital Signature:</strong> 
+              <code style="background: #251B14; padding: 3px 6px; border-radius: 4px; color: #F4B400; font-size: 0.8rem;">{{ batch.digital_signature }}</code>
+            </div>
+          </div>
+        {% else %}
+          <div style="color: #6B7280; font-size: 0.88rem; font-style: italic;">
+            Laboratory testing not yet recorded for this batch.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Stage 3: Packaging & Bottling -->
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #3E291B; padding-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #8B5CF6; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-box-open"></i> Stage 3: Packaging &amp; Tamper Sealing
+          </h3>
+          {% if batch.stage_num >= 3 %}
+            <span style="font-size: 0.78rem; color: #10B981; font-weight: 700;">
+              <i class="fa-solid fa-circle-check"></i> Recorded in Block 3
+            </span>
+          {% elif batch.stage_num == 2 %}
+            <a href="{{ url_for('stages_packer') }}?batch_id={{ batch.batch_id }}" class="btn-sm" style="background: #8B5CF6; color: #FFFFFF; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.78rem; font-weight: 700;">
+              Record Packaging &rarr;
+            </a>
+          {% else %}
+            <span style="font-size: 0.78rem; color: #6B7280;">Awaiting Lab Test</span>
+          {% endif %}
+        </div>
+
+        {% if batch.stage_num >= 3 %}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.88rem;">
+            <div><strong style="color: #9CA3AF;">Packaging Plant:</strong> <span style="color: #FFF8E7;">{{ batch.packaging_plant }}</span></div>
+            <div><strong style="color: #9CA3AF;">Supervisor:</strong> <span style="color: #FFF8E7;">{{ batch.packaging_supervisor }}</span></div>
+            <div><strong style="color: #9CA3AF;">Jar Format:</strong> <span style="color: #FFF8E7;">{{ batch.jar_format }}</span></div>
+            <div><strong style="color: #9CA3AF;">Tamper-Seal ID:</strong> <span style="color: #10B981; font-weight: 700;">{{ batch.tamper_seal_id }}</span></div>
+            <div><strong style="color: #9CA3AF;">Lot Number:</strong> <span style="color: #FFF8E7;">{{ batch.lot_number }}</span></div>
+            <div><strong style="color: #9CA3AF;">Packaging Date:</strong> <span style="color: #FFF8E7;">{{ batch.packaging_date }}</span></div>
+          </div>
+        {% else %}
+          <div style="color: #6B7280; font-size: 0.88rem; font-style: italic;">
+            Packaging information not yet recorded for this batch.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Stage 4: Retail & Distribution -->
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #3E291B; padding-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #EC4899; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-store"></i> Stage 4: Retail Shelf &amp; Distribution
+          </h3>
+          {% if batch.stage_num >= 4 %}
+            <span style="font-size: 0.78rem; color: #10B981; font-weight: 700;">
+              <i class="fa-solid fa-circle-check"></i> Recorded in Block 4
+            </span>
+          {% elif batch.stage_num == 3 %}
+            <a href="{{ url_for('stages_seller') }}?batch_id={{ batch.batch_id }}" class="btn-sm" style="background: #EC4899; color: #FFFFFF; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.78rem; font-weight: 700;">
+              Record Retail Arrival &rarr;
+            </a>
+          {% else %}
+            <span style="font-size: 0.78rem; color: #6B7280;">Awaiting Packaging</span>
+          {% endif %}
+        </div>
+
+        {% if batch.stage_num >= 4 %}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.88rem;">
+            <div><strong style="color: #9CA3AF;">Retailer Name:</strong> <span style="color: #FFF8E7;">{{ batch.seller_name }}</span></div>
+            <div><strong style="color: #9CA3AF;">Store Location:</strong> <span style="color: #FFF8E7;">{{ batch.store_location }}</span></div>
+            <div><strong style="color: #9CA3AF;">License No:</strong> <span style="color: #FFF8E7;">{{ batch.license_no }}</span></div>
+            <div><strong style="color: #9CA3AF;">Shelf Arrival:</strong> <span style="color: #FFF8E7;">{{ batch.shelf_arrival_date }}</span></div>
+            <div><strong style="color: #9CA3AF;">Sale Price:</strong> <span style="color: #F4B400; font-weight: 700;">{{ batch.sale_price }}</span></div>
+            <div><strong style="color: #9CA3AF;">Status:</strong> <span style="color: #10B981;">{{ batch.retail_status }}</span></div>
+          </div>
+        {% else %}
+          <div style="color: #6B7280; font-size: 0.88rem; font-style: italic;">
+            Retail distribution not yet recorded for this batch.
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Right Column: QR Code & Cryptographic Ledger Details -->
+    <div>
+      <!-- QR Code Card -->
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px; text-align: center; margin-bottom: 20px;">
+        <h4 style="margin: 0 0 14px 0; color: #F4B400; font-size: 1rem; font-weight: 700;">
+          <i class="fa-solid fa-qrcode"></i> Batch QR Code
+        </h4>
+
+        {% if batch.qr_code_image %}
+          <div style="background: #FFFFFF; padding: 14px; border-radius: 12px; display: inline-block; margin-bottom: 14px;">
+            <img src="{{ url_for('static', filename='qrcodes/' + batch.qr_code_image) }}" alt="QR Code for {{ batch.batch_id }}" style="width: 180px; height: 180px; display: block;">
+          </div>
+        {% endif %}
+
+        <div style="font-size: 0.8rem; color: #9CA3AF; margin-bottom: 14px;">
+          Scan with mobile phone camera to view full customer provenance record.
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <a href="{{ url_for('static', filename='qrcodes/' + batch.qr_code_image) }}" download="{{ batch.batch_id }}.png" class="btn-primary" style="width: auto; padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">
+            <i class="fa-solid fa-download"></i> Save PNG
+          </a>
+          <a href="{{ url_for('trace_batch', batch_id=batch.batch_id) }}" target="_blank" class="btn-secondary" style="width: auto; padding: 8px 14px; font-size: 0.85rem; text-decoration: none; background: #251B14; border: 1px solid #4A2C16; color: #FFF8E7;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Link
+          </a>
+        </div>
+      </div>
+
+      <!-- Blockchain Proof Card -->
+      <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+        <h4 style="margin: 0 0 14px 0; color: #10B981; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-cube"></i> Ledger Audit Trail
+        </h4>
+
+        <div style="font-size: 0.82rem; margin-bottom: 10px;">
+          <strong style="color: #9CA3AF; display: block; margin-bottom: 3px;">Latest Block Index:</strong>
+          <span style="color: #F4B400; font-weight: 700;">Block #{{ batch.block_index }}</span>
+        </div>
+
+        <div style="font-size: 0.82rem; margin-bottom: 12px;">
+          <strong style="color: #9CA3AF; display: block; margin-bottom: 3px;">Block Cryptographic Hash:</strong>
+          <code style="display: block; word-break: break-all; background: #251B14; padding: 6px 8px; border-radius: 6px; color: #10B981; font-size: 0.75rem;">
+            {{ batch.tx_hash }}
+          </code>
+        </div>
+
+        <a href="{{ url_for('blockchain_records') }}" style="color: #F4B400; font-size: 0.82rem; text-decoration: none; font-weight: 600;">
+          Inspect on Blockchain Explorer &rarr;
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Step 3: Laboratory Testing{% endblock %}
+
+{% block content %}
+<!-- Step-by-Step Pipeline Wizard -->
+{% set current_step = 3 %}
+{% include "step_wizard.html" %}
+
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-flask-vial"></i> Step 3: Laboratory Testing</h1>
+    <p class="page-subtitle">Record scientific purity assays, NMR profiles, and mint Block 2 into the blockchain ledger</p>
+  </div>
+</div>
+
+<!-- Step 3 Completion Card: Proceeds to Step 4 -->
+{% if request.args.get('step_completed') == '3' %}
+  <div class="step-next-card">
+    <div class="step-next-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="step-next-text">
+      <h4>Step 3 Completed: Laboratory Quality Certified &amp; Block 2 Mined!</h4>
+      <p>
+        Purity score and chemical assays for Batch <strong>{{ request.args.get('batch_id', '') }}</strong> are cryptographically sealed in Block 2.
+        Proceed to Step 4 for bottling and tamper-evident sealing.
+      </p>
+    </div>
+    <a href="{{ url_for('packer', batch_id=request.args.get('batch_id', '')) }}" class="btn-primary step-next-btn">
+      Proceed to Step 4: Packer Management &rarr;
+    </a>
+  </div>
+{% endif %}
+
+<!-- Record Lab Test Form -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-microscope"></i> Record Lab Analysis &amp; Mint Block 2 (Quality Certificate)</h2>
+  <form action="{{ url_for('laboratory') }}" method="POST">
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label" for="batch_id"><i class="fa-solid fa-barcode"></i> Select Honey Batch</label>
+        <select id="batch_id" name="batch_id" class="form-input" required>
+          <option value="">-- Choose Batch to Test --</option>
+          {% for b in batches %}
+            <option value="{{ b.batch_id }}" {% if b.batch_id == selected_batch_id %}selected{% endif %}>
+              {{ b.batch_id }} - {{ b.product_name }} (Stage {{ b.stage_num }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="lab_name"><i class="fa-solid fa-building-shield"></i> Accredited Laboratory Name</label>
+        <input type="text" id="lab_name" name="lab_name" class="form-input" placeholder="e.g. Accredited Food Testing Laboratory" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inspector_name"><i class="fa-solid fa-user-doctor"></i> Inspector / Chemist Name</label>
+        <input type="text" id="inspector_name" name="inspector_name" class="form-input" placeholder="e.g. Quality Inspector Name" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="certificate_no"><i class="fa-solid fa-certificate"></i> Official Certificate No.</label>
+        <input type="text" id="certificate_no" name="certificate_no" class="form-input" placeholder="e.g. CERT-{{ today_date[:4] }}-{{ suggested_cert_num }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="purity_score"><i class="fa-solid fa-percent"></i> Purity Score (%)</label>
+        <input type="number" id="purity_score" name="purity_score" class="form-input" placeholder="e.g. 99.8" min="0" max="100" step="0.1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="moisture_content"><i class="fa-solid fa-droplet"></i> Moisture Content (%)</label>
+        <input type="number" id="moisture_content" name="moisture_content" class="form-input" placeholder="e.g. 16.4" min="0" max="30" step="0.1" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="nmr_profile"><i class="fa-solid fa-wave-square"></i> NMR Spectrometry Profile</label>
+        <input type="text" id="nmr_profile" name="nmr_profile" class="form-input" placeholder="e.g. 100% Pure Raw Honey - No Exogenous Sugars" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="hmf_level"><i class="fa-solid fa-vial"></i> HMF Level (mg/kg)</label>
+        <input type="number" id="hmf_level" name="hmf_level" class="form-input" placeholder="e.g. 4.0" step="0.1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="lab_test_date"><i class="fa-solid fa-calendar"></i> Testing Date</label>
+        <input type="date" id="lab_test_date" name="lab_test_date" class="form-input" value="{{ today_date }}" required>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <span style="font-size: 0.88rem; color: var(--text-muted);">
+        <i class="fa-solid fa-info-circle"></i> Once submitted, Block 2 will be mined and you will proceed to Step 4 (Packaging).
+      </span>
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+        <i class="fa-solid fa-stamp"></i> Mint Block 2 &amp; Proceed to Step 4 &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Laboratory Test Registry Table -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Quality &amp; Purity Assay Certificates</h2>
+  <div class="table-responsive">
+    <table class="honey-table">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Laboratory</th>
+          <th>Inspector</th>
+          <th>Certificate No.</th>
+          <th>Purity Score</th>
+          <th>Moisture</th>
+          <th>Status</th>
+          <th>Step 4 Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if tested_batches %}
+          {% for b in tested_batches %}
+            <tr>
+              <td><span class="code-hash">{{ b.batch_id }}</span></td>
+              <td><strong>{{ b.lab_name }}</strong></td>
+              <td>{{ b.inspector_name }}</td>
+              <td><span class="code-hash">{{ b.certificate_no or 'CERT-PENDING' }}</span></td>
+              <td><span class="badge badge-stage-4">{{ b.purity_score }}% Pure</span></td>
+              <td>{{ b.moisture_content }}%</td>
+              <td>
+                <span class="badge badge-stage-2"><i class="fa-solid fa-shield-halved"></i> Block 2 Sealed</span>
+              </td>
+              <td>
+                <a href="{{ url_for('packer', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #2563eb;">
+                  <i class="fa-solid fa-box"></i> Package (Step 4) &rarr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="table-empty">No records found. Add a new record to get started.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

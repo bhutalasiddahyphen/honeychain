@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="honeyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#F4B400" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+    <linearGradient id="brownGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5C381E" />
+      <stop offset="100%" stop-color="#4A2C16" />
+    </linearGradient>
+  </defs>
+
+  <!-- Honeycomb Hexagon Background -->
+  <polygon points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5" fill="url(#honeyGrad)" stroke="#4A2C16" stroke-width="4" stroke-linejoin="round"/>
+  
+  <!-- Inner Hexagon Ring -->
+  <polygon points="50,15 80,32 80,68 50,85 20,68 20,32" fill="none" stroke="#FFF8E7" stroke-width="2" opacity="0.6"/>
+
+  <!-- Honey Drop & Bee Motif -->
+  <!-- Golden Drop -->
+  <path d="M50,26 C50,26 68,48 68,60 C68,70 60,78 50,78 C40,78 32,70 32,60 C32,48 50,26 50,26 Z" fill="url(#brownGrad)" />
+  
+  <!-- Highlights -->
+  <circle cx="56" cy="54" r="3.5" fill="#F4B400" />
+  <path d="M42,58 Q50,68 58,58" fill="none" stroke="#F4B400" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Blockchain nodes link at base -->
+  <circle cx="36" cy="40" r="3" fill="#FFF8E7" />
+  <circle cx="64" cy="40" r="3" fill="#FFF8E7" />
+  <line x1="36" y1="40" x2="64" y2="40" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="2,2"/>
+</svg>
+

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Blockchain Records{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-link"></i> Blockchain Records</h1>
+    <p class="page-subtitle">Inspect immutable SHA-256 blocks, cryptographically linked supply-chain transactions, and verify chain integrity</p>
+  </div>
+  <div>
+    <form action="{{ url_for('verify_chain_action') }}" method="POST" style="display: inline;">
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 20px; padding-right: 20px;">
+        <i class="fa-solid fa-shield-halved"></i> Verify Cryptographic Chain Integrity
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Prototype Architecture Notice (Mandatory Requirement) -->
+<div class="blockchain-prototype-banner">
+  <div class="prototype-icon">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+  </div>
+  <div class="prototype-text">
+    <h4>Basic Application-Level Blockchain Prototype</h4>
+    <p>
+      This is a <strong>basic application-level blockchain prototype</strong> built with Python and <code>hashlib.sha256</code>.
+      Each block is cryptographically linked to the previous block via SHA-256 hashes and Proof-of-Work difficulty target (<code>00...</code>).
+      It demonstrates immutable supply chain provenance for educational and verification purposes, rather than operating as an open public blockchain network.
+    </p>
+  </div>
+</div>
+
+<!-- Chain Integrity Status -->
+<div class="honey-card" style="padding: 20px 24px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      {% if is_chain_valid %}
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.15rem; color: #15803d; font-family: var(--font-heading);">LEDGER INTEGRITY 100% VERIFIED</h3>
+          <p style="font-size: 0.86rem; color: var(--text-muted);">{{ validation_msg }} (Total Blocks: {{ chain_length }})</p>
+        </div>
+      {% else %}
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: #ffe4e6; color: #e11d48; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+          <i class="fa-solid fa-xmark"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.15rem; color: #e11d48; font-family: var(--font-heading);">TAMPER DETECTED</h3>
+          <p style="font-size: 0.86rem; color: var(--text-muted);">{{ validation_msg }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="font-size: 0.88rem; color: var(--text-muted); font-family: var(--font-mono);">
+      Hash Algorithm: <strong>SHA-256</strong> | Difficulty: <strong>2 Zeros Target</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Blockchain Blocks Table -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-cubes"></i> Immutable Blockchain Ledger (SHA-256)</h2>
+  <div class="table-responsive">
+    <table class="honey-table">
+      <thead>
+        <tr>
+          <th>Block #</th>
+          <th>Type / Stage</th>
+          <th>Timestamp (UTC)</th>
+          <th>Batch ID</th>
+          <th>Previous Block Hash</th>
+          <th>Current Block Hash (SHA-256)</th>
+          <th>Nonce</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if all_blocks %}
+          {% for b in all_blocks %}
+          <tr>
+            <td>
+              <strong style="color: var(--brown-900); font-family: var(--font-mono); font-size: 1rem;">
+                #{{ b.index }}
+              </strong>
+            </td>
+            <td>
+              {% if b.index == 0 %}
+                <span class="badge" style="background: #e0e7ff; color: #3730a3;"><i class="fa-solid fa-flag"></i> Genesis Block</span>
+              {% elif 'Batch' in b.block_type or 'HARVEST' in b.block_type %}
+                <span class="badge badge-stage-1"><i class="fa-solid fa-seedling"></i> Block 1</span>
+              {% elif 'Lab' in b.block_type or 'TEST' in b.block_type %}
+                <span class="badge badge-stage-2"><i class="fa-solid fa-flask"></i> Block 2</span>
+              {% elif 'Pack' in b.block_type %}
+                <span class="badge badge-stage-3"><i class="fa-solid fa-box"></i> Block 3</span>
+              {% elif 'Seller' in b.block_type %}
+                <span class="badge badge-stage-4"><i class="fa-solid fa-shop"></i> Block 4</span>
+              {% else %}
+                <span class="badge badge-gold">{{ b.block_type }}</span>
+              {% endif %}
+            </td>
+            <td><small style="font-family: var(--font-mono);">{{ b.timestamp }}</small></td>
+            <td>
+              <span class="code-hash">{{ b.data.get('batch_id') or 'SYSTEM' }}</span>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="code-hash" title="{{ b.previous_hash }}">{{ b.previous_hash[:12] }}...{{ b.previous_hash[-6:] }}</span>
+                <button type="button" onclick="copyHash('{{ b.previous_hash }}', this)" style="background:none; border:none; cursor:pointer; color: var(--gold-600);" title="Copy Full Hash">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <strong class="code-hash" style="color: #065f46; background: #ecfdf5;" title="{{ b.hash }}">
+                  {{ b.hash[:14] }}...{{ b.hash[-8:] }}
+                </strong>
+                <button type="button" onclick="copyHash('{{ b.hash }}', this)" style="background:none; border:none; cursor:pointer; color: var(--gold-600);" title="Copy Full Hash">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+            </td>
+            <td><span class="badge badge-gold">{{ b.nonce }}</span></td>
+            <td>
+              <details style="cursor: pointer; font-size: 0.82rem;">
+                <summary style="color: var(--gold-700); font-weight: 600;">View Payload</summary>
+                <pre style="background: var(--cream-100); padding: 8px; border-radius: 4px; margin-top: 6px; font-family: var(--font-mono); font-size: 0.76rem; max-width: 320px; overflow-x: auto;">{{ b.data | pretty_json }}</pre>
+              </details>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="table-empty">No records found. Add a new record to get started.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

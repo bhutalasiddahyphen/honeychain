@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code Generator{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-qrcode"></i> QR Code Generator</h1>
+    <p class="page-subtitle">Generate high-resolution cryptographic QR codes linked to immutable batch provenance</p>
+  </div>
+</div>
+
+<div class="form-grid-2">
+  <!-- Generation Form -->
+  <div class="honey-card">
+    <h2 class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Select or Input Batch</h2>
+    <form action="{{ url_for('qr_generator') }}" method="GET" class="auth-form">
+      <div class="form-group">
+        <label class="form-label" for="batch_id"><i class="fa-solid fa-list-check"></i> Choose Registered Batch</label>
+        <select id="batch_id" name="batch_id" class="form-input" onchange="this.form.submit()">
+          <option value="">-- Choose from existing batches --</option>
+          {% for b in batches %}
+            <option value="{{ b.batch_id }}" {% if b.batch_id == selected_batch_id %}selected{% endif %}>
+              {{ b.batch_id }} - {{ b.product_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="custom_id"><i class="fa-solid fa-keyboard"></i> Or Type Custom Batch ID</label>
+        <input type="text" id="custom_id" name="custom_id" class="form-input" placeholder="e.g. Enter Batch ID" value="{{ selected_batch_id or '' }}">
+      </div>
+
+      <button type="submit" class="btn-primary">
+        <i class="fa-solid fa-qrcode"></i> Generate QR Code
+      </button>
+    </form>
+  </div>
+
+  <!-- QR Code Display Card -->
+  <div class="honey-card" style="text-align: center;">
+    <h2 class="card-title" style="justify-content: center;"><i class="fa-solid fa-print"></i> Jar QR Label Preview</h2>
+    
+    {% if selected_batch_id and qr_image %}
+      <div id="printableQrLabel" style="padding: 16px; background: var(--cream-50); border: 1.5px dashed var(--gold-400); border-radius: var(--radius-md); display: inline-block; margin-bottom: 20px;">
+        <img 
+          src="{{ url_for('static', filename='qrcodes/' + qr_image) }}" 
+          alt="Honey Batch QR Code" 
+          style="width: 220px; height: 220px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);"
+          onerror="this.src='/static/images/honeychain-logo.png'"
+        >
+        <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--brown-900);">
+          HONEYCHAIN VERIFIED
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--gold-700); margin-top: 2px;">
+          {{ selected_batch_id }}
+        </div>
+        {% if batch_info %}
+          <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+            {{ batch_info.product_name }}<br>
+            {{ batch_info.apiary_name }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('static', filename='qrcodes/' + qr_image) }}" download="{{ selected_batch_id }}_QR.png" class="btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.88rem;">
+          <i class="fa-solid fa-download"></i> Download PNG
+        </a>
+        <button type="button" onclick="printQrLabel('printableQrLabel')" class="btn-primary" style="background: var(--brown-850); width: auto; padding: 10px 18px; font-size: 0.88rem;">
+          <i class="fa-solid fa-print"></i> Print Jar Label
+        </button>
+        <a href="{{ url_for('verification', batch_id=selected_batch_id) }}" class="btn-primary" style="background: #059669; width: auto; padding: 10px 18px; font-size: 0.88rem;">
+          <i class="fa-solid fa-shield-check"></i> Test Verification
+        </a>
+      </div>
+    {% else %}
+      <div style="padding: 50px 20px; color: var(--text-muted);">
+        <i class="fa-solid fa-qrcode" style="font-size: 3rem; color: var(--cream-400); margin-bottom: 12px; display: block;"></i>
+        Select or enter a batch ID on the left to render its official QR code.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

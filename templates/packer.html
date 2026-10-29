@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Step 4: Packer Management{% endblock %}
+
+{% block content %}
+<!-- Step-by-Step Pipeline Wizard -->
+{% set current_step = 4 %}
+{% include "step_wizard.html" %}
+
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-box-open"></i> Step 4: Packer Management</h1>
+    <p class="page-subtitle">Record clean bottling, food-grade packaging formats, and tamper seals into Block 3</p>
+  </div>
+</div>
+
+<!-- Step 4 Completion Card: Proceeds to Step 5 -->
+{% if request.args.get('step_completed') == '4' %}
+  <div class="step-next-card">
+    <div class="step-next-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="step-next-text">
+      <h4>Step 4 Completed: Bottling &amp; Tamper Seal Recorded &amp; Block 3 Mined!</h4>
+      <p>
+        Batch <strong>{{ request.args.get('batch_id', '') }}</strong> is hermetically sealed with its cryptographic tamper seal.
+        Proceed to Step 5 to authenticate arrival at the retail boutique shelf.
+      </p>
+    </div>
+    <a href="{{ url_for('seller', batch_id=request.args.get('batch_id', '')) }}" class="btn-primary step-next-btn">
+      Proceed to Step 5: Seller Management &rarr;
+    </a>
+  </div>
+{% endif %}
+
+<!-- Record Packaging Form -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-shield-cat"></i> Record Bottling &amp; Mint Block 3 (Tamper Seal Lock)</h2>
+  <form action="{{ url_for('packer') }}" method="POST">
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label" for="batch_id"><i class="fa-solid fa-barcode"></i> Select Honey Batch</label>
+        <select id="batch_id" name="batch_id" class="form-input" required>
+          <option value="">-- Choose Batch to Package --</option>
+          {% for b in batches %}
+            <option value="{{ b.batch_id }}" {% if b.batch_id == selected_batch_id %}selected{% endif %}>
+              {{ b.batch_id }} - {{ b.product_name }} (Stage {{ b.stage_num }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="packaging_plant"><i class="fa-solid fa-industry"></i> Packaging Plant Facility</label>
+        <input type="text" id="packaging_plant" name="packaging_plant" class="form-input" placeholder="e.g. Certified Packaging Facility" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="packaging_supervisor"><i class="fa-solid fa-user-tie"></i> Bottling Supervisor Name</label>
+        <input type="text" id="packaging_supervisor" name="packaging_supervisor" class="form-input" placeholder="e.g. Packaging Supervisor Name" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="jar_format"><i class="fa-solid fa-jar"></i> Jar / Container Format</label>
+        <select id="jar_format" name="jar_format" class="form-input">
+          <option value="500g Hexagonal Embossed Glass Jar">500g Hexagonal Embossed Glass Jar</option>
+          <option value="250g Artisan Glass Hex Jar">250g Artisan Glass Hex Jar</option>
+          <option value="1kg Premium Food Grade Tin">1kg Premium Food Grade Tin</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="net_weight"><i class="fa-solid fa-weight-hanging"></i> Net Unit Weight</label>
+        <input type="text" id="net_weight" name="net_weight" class="form-input" placeholder="e.g. 500g (± 2g)" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="tamper_seal_id"><i class="fa-solid fa-lock"></i> Cryptographic Tamper Seal ID</label>
+        <input type="text" id="tamper_seal_id" name="tamper_seal_id" class="form-input" value="{{ suggested_seal_id }}" required>
+      </div>
+    </div>
+
+    <div class="form-grid-2" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="lot_number"><i class="fa-solid fa-layer-group"></i> Production Lot Number</label>
+        <input type="text" id="lot_number" name="lot_number" class="form-input" placeholder="e.g. LOT-{{ today_date[:4] }}-{{ suggested_lot_num }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="packaging_date"><i class="fa-solid fa-calendar"></i> Packaging / Sealing Date</label>
+        <input type="date" id="packaging_date" name="packaging_date" class="form-input" value="{{ today_date }}" required>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <span style="font-size: 0.88rem; color: var(--text-muted);">
+        <i class="fa-solid fa-info-circle"></i> Once submitted, Block 3 will be mined and you will proceed to Step 5 (Seller Management).
+      </span>
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+        <i class="fa-solid fa-box-check"></i> Mint Block 3 &amp; Proceed to Step 5 &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Packaged Batches Registry Table -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Packaging &amp; Bottling Registry</h2>
+  <div class="table-responsive">
+    <table class="honey-table">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Packaging Plant</th>
+          <th>Container Format</th>
+          <th>Tamper Seal ID</th>
+          <th>Lot No.</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Step 5 Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if packaged_batches %}
+          {% for b in packaged_batches %}
+            <tr>
+              <td><span class="code-hash">{{ b.batch_id }}</span></td>
+              <td><strong>{{ b.packaging_plant }}</strong></td>
+              <td>{{ b.jar_format }}</td>
+              <td><span class="code-hash">{{ b.tamper_seal_id or 'SEAL-PENDING' }}</span></td>
+              <td>{{ b.lot_number or 'N/A' }}</td>
+              <td>{{ b.packaging_date }}</td>
+              <td>
+                <span class="badge badge-stage-3"><i class="fa-solid fa-lock"></i> Block 3 Sealed</span>
+              </td>
+              <td>
+                <a href="{{ url_for('seller', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #7c3aed;">
+                  <i class="fa-solid fa-shop"></i> Retail (Step 5) &rarr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="table-empty">No records found. Add a new record to get started.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

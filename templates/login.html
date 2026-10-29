@@ -3,285 +3,219 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - HoneyChain 5-Block Provenance Portal</title>
-  <meta name="description" content="Role-based login for HoneyChain Consortium: Admin, Apiary Beekeeper, Lab Inspector, Bottling Facility, Retailer, and Consumer.">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>{% if mode == 'admin' %}Consortium Admin Gateway{% else %}Sign In{% endif %} — HONEY CHAIN</title>
+  <meta name="description" content="Sign in to HoneyChain: Blockchain-Based Honey Traceability System">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/honey-logo.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f59e0b">
-  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
-<body>
+<body class="auth-body">
 
-  <!-- Top App Header -->
-  <nav class="navbar" id="main-nav">
-    <div class="container nav-container">
-      <a href="{{ url_for('index') }}" class="brand-logo">
-        <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
-        <div class="brand-text">
-          <span class="brand-name">Honey<span>Chain</span></span>
-          <span class="brand-tagline">Consortium Access Control</span>
-        </div>
-      </a>
-
-      <ul class="nav-links">
-        <li>
-          <a href="{{ url_for('index') }}" class="nav-link">
-            <i class="fa-solid fa-arrow-left"></i> Back to Master Portal
-          </a>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- Flash Notifications -->
-  <div class="container flash-container" style="margin-top: 1.5rem;">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message flash-{{ category }}" role="alert">
-            <span><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-  </div>
-
-  <!-- Main Login Screen -->
-  <main class="login-page-section">
-    <div class="login-card-main">
-      
-      <!-- Header -->
-      <div style="text-align: center; margin-bottom: 2.25rem;">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); margin-bottom: 1rem; box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);">
-          <i class="fa-solid fa-shield-halved text-honey" style="font-size: 1.75rem;"></i>
-        </div>
-        <h1 style="font-size: 2rem; color: #fff; margin-bottom: 0.4rem;">
-          Consortium Ledger Login
-        </h1>
-        <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 580px; margin: 0 auto;">
-          Authenticate with your role credentials to register harvest lots, sign chemical laboratory assays, or audit end-to-end custody provenance.
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- Honey Chain Logo & Title -->
+      <div class="auth-header">
+        <a href="{{ url_for('index') }}" class="auth-logo" title="Back to HoneyChain Welcome Page">
+          <img src="{{ url_for('static', filename='images/honey-logo.svg') }}" alt="Honey Chain Logo">
+        </a>
+        <h1 class="auth-title">HONEY CHAIN</h1>
+        <p class="auth-subtitle">
+          {% if mode == 'admin' %}
+            Consortium Administrator Gateway
+          {% else %}
+            Sign in to track, certify, and manage honey batches
+          {% endif %}
         </p>
       </div>
 
-      <div class="login-grid-split">
-        
-        <!-- Left: Form Login -->
-        <div>
-          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
-            <i class="fa-solid fa-key text-honey"></i>
-            <h3 style="font-size: 1.15rem; color: #fff; margin: 0;">Sign In With Credentials</h3>
+      <!-- User vs Admin Navigation Tabs -->
+      <div class="auth-mode-tabs" role="tablist">
+        <a href="{{ url_for('login', mode='user') }}" class="auth-mode-tab {% if mode != 'admin' %}active{% endif %}" id="tab-user" role="tab" aria-selected="{% if mode != 'admin' %}true{% else %}false{% endif %}">
+          <i class="fa-solid fa-user"></i>
+          <span>User Login</span>
+        </a>
+        <a href="{{ url_for('login', mode='admin') }}" class="auth-mode-tab {% if mode == 'admin' %}active{% endif %}" id="tab-admin" role="tab" aria-selected="{% if mode == 'admin' %}true{% else %}false{% endif %}">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Admin Portal</span>
+        </a>
+      </div>
+
+      <!-- Flash Notifications -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert-message alert-{{ 'error' if category == 'error' or category == 'danger' else ('success' if category == 'success' else 'info') }}">
+              <i class="fa-solid fa-{{ 'triangle-exclamation' if category == 'error' or category == 'danger' else ('circle-check' if category == 'success' else 'circle-info') }}"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% if mode == 'admin' %}
+        <!-- Admin Security Callout -->
+        <div class="admin-security-badge">
+          <i class="fa-solid fa-lock"></i>
+          <span>Consortium Lead Auditor &amp; Administrative Access Only</span>
+        </div>
+      {% else %}
+        <!-- Google Sign-In Button (Clean, Simple Google SSO) -->
+        <a href="{{ url_for('google_login') }}" class="btn-google" id="googleLoginBtn">
+          <!-- Official Google "G" 4-Color SVG -->
+          <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </a>
+
+        <div class="auth-divider">
+          <span>or sign in with email</span>
+        </div>
+      {% endif %}
+
+      <!-- Standard Credentials Form -->
+      <form action="{{ url_for('login', mode=mode) }}" method="POST" class="auth-form" id="loginForm">
+        <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+        <input type="hidden" name="login_mode" value="{{ mode or 'user' }}">
+
+        <!-- Email or Username -->
+        <div class="form-group">
+          <label for="identifier">
+            {% if mode == 'admin' %}Admin Email or Username{% else %}Email Address or Username{% endif %}
+          </label>
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-{% if mode == 'admin' %}shield-halved{% else %}envelope{% endif %} prefix-icon"></i>
+            <input 
+              type="text" 
+              id="identifier" 
+              name="identifier" 
+              class="auth-input" 
+              placeholder="{% if mode == 'admin' %}admin@honeychain.local{% else %}name@honeychain.io{% endif %}" 
+              required 
+              autocomplete="username"
+              value="{% if mode == 'admin' %}admin@honeychain.local{% endif %}"
+              autofocus
+            >
           </div>
+        </div>
 
-          <form action="{{ url_for('login') }}" method="POST" id="login-form">
-            
-            <div class="form-group">
-              <label for="identifier" class="form-label">Email Address or Username</label>
-              <div class="input-icon-wrapper">
-                <i class="fa-solid fa-envelope left-icon"></i>
-                <input 
-                  type="text" 
-                  name="identifier" 
-                  id="identifier" 
-                  class="form-control" 
-                  placeholder="e.g. admin@honeychain.io or admin" 
-                  required
-                  value="{{ request.form.get('identifier', '') }}"
-                >
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="password" class="form-label">Password</label>
-              <div class="input-icon-wrapper">
-                <i class="fa-solid fa-lock left-icon"></i>
-                <input 
-                  type="password" 
-                  name="password" 
-                  id="password" 
-                  class="form-control" 
-                  placeholder="Enter your password" 
-                  required
-                >
-                <i class="fa-regular fa-eye right-toggle" id="toggle-pw-btn" onclick="togglePasswordVisibility()" title="Show/Hide Password"></i>
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.8rem; color: var(--text-dim);">
-              <label style="display: flex; align-items: center; gap: 0.45rem; cursor: pointer;">
-                <input type="checkbox" name="remember" checked style="accent-color: var(--honey-500);">
-                <span>Remember this terminal</span>
-              </label>
-              <span style="color: var(--honey-400);">PoW Secured</span>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 0.95rem; margin-bottom: 1rem;" id="btn-submit-login">
-              <i class="fa-solid fa-right-to-bracket"></i> Sign In to Blockchain Ledger
-            </button>
-
-            <a href="{{ url_for('index', tab='hub') }}" class="btn btn-secondary" style="width: 100%; text-align: center; font-size: 0.85rem; padding: 0.65rem;">
-              <i class="fa-solid fa-user-check" style="color: #06b6d4;"></i> Continue as Public Consumer (Guest)
+        <!-- Password with Show/Hide toggle -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="password" style="margin-bottom: 0;">Password</label>
+            <a href="javascript:void(0)" onclick="openForgotPasswordPrompt()" style="font-size: 0.78rem; color: var(--hc-text-muted); text-decoration: none;">
+              Forgot?
             </a>
-          </form>
-        </div>
-
-        <!-- Right: 1-Click Persona Quick Logins -->
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fa-solid fa-wand-magic-sparkles text-honey"></i>
-              <h3 style="font-size: 1.15rem; color: #fff; margin: 0;">1-Click Persona Demo Logins</h3>
-            </div>
-            <span class="badge badge-honey" style="font-size: 0.7rem;">INSTANT ACCESS</span>
           </div>
-
-          <p style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 1rem;">
-            Click any consortium persona below to immediately log in and explore role-specific permissions:
-          </p>
-
-          <!-- 1-Click Cards List -->
-          <div>
-            
-            <!-- 1. Admin -->
-            <div class="persona-preset-card" onclick="quickLogin('admin@honeychain.io', 'admin123')">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="persona-avatar" style="background: rgba(244, 63, 94, 0.2); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.4);">
-                  <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <div>
-                  <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Consortium Chief Auditor</div>
-                  <div style="font-size: 0.72rem; color: var(--text-dim);">admin@honeychain.io &bull; Admin Permissions</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; font-size: 0.7rem;">
-                Login <i class="fa-solid fa-arrow-right"></i>
-              </span>
-            </div>
-
-            <!-- 2. Beekeeper -->
-            <div class="persona-preset-card" onclick="quickLogin('beekeeper@honeychain.io', 'beekeeper123')">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="persona-avatar" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">
-                  <i class="fa-solid fa-seedling"></i>
-                </div>
-                <div>
-                  <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Master Beekeeper (Apiary)</div>
-                  <div style="font-size: 0.72rem; color: var(--text-dim);">beekeeper@honeychain.io &bull; Block 1 Mining</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-size: 0.7rem;">
-                Login <i class="fa-solid fa-arrow-right"></i>
-              </span>
-            </div>
-
-            <!-- 3. Lab Inspector -->
-            <div class="persona-preset-card" onclick="quickLogin('lab@honeychain.io', 'lab123')">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="persona-avatar" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4);">
-                  <i class="fa-solid fa-flask-vial"></i>
-                </div>
-                <div>
-                  <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Testing Lab Inspector</div>
-                  <div style="font-size: 0.72rem; color: var(--text-dim);">lab@honeychain.io &bull; Block 2 Digital Seal</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 0.7rem;">
-                Login <i class="fa-solid fa-arrow-right"></i>
-              </span>
-            </div>
-
-            <!-- 4. Bottling Plant -->
-            <div class="persona-preset-card" onclick="quickLogin('packager@honeychain.io', 'packager123')">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="persona-avatar" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4);">
-                  <i class="fa-solid fa-box-open"></i>
-                </div>
-                <div>
-                  <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Certified Packaging Facility</div>
-                  <div style="font-size: 0.72rem; color: var(--text-dim);">packager@honeychain.io &bull; Block 3 Bottler</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 0.7rem;">
-                Login <i class="fa-solid fa-arrow-right"></i>
-              </span>
-            </div>
-
-            <!-- 5. Retailer -->
-            <div class="persona-preset-card" onclick="quickLogin('seller@honeychain.io', 'seller123')">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="persona-avatar" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.4);">
-                  <i class="fa-solid fa-store"></i>
-                </div>
-                <div>
-                  <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Authorized Retailer / Store</div>
-                  <div style="font-size: 0.72rem; color: var(--text-dim);">seller@honeychain.io &bull; Block 4 Retail Shelf</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; font-size: 0.7rem;">
-                Login <i class="fa-solid fa-arrow-right"></i>
-              </span>
-            </div>
-
-            <!-- 6. Consumer -->
-            <div class="persona-preset-card" onclick="quickLogin('consumer@honeychain.io', 'consumer123')">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="persona-avatar" style="background: rgba(6, 182, 212, 0.2); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.4);">
-                  <i class="fa-solid fa-user-check"></i>
-                </div>
-                <div>
-                  <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Public Consumer / Shopper</div>
-                  <div style="font-size: 0.72rem; color: var(--text-dim);">consumer@honeychain.io &bull; Jar Trace & Feedback</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4; font-size: 0.7rem;">
-                Login <i class="fa-solid fa-arrow-right"></i>
-              </span>
-            </div>
-
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-lock prefix-icon"></i>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="auth-input" 
+              placeholder="Enter your password" 
+              required 
+              autocomplete="current-password"
+              value="{% if mode == 'admin' %}Admin@123{% endif %}"
+            >
+            <button type="button" class="toggle-password" data-target="password" title="Show or hide password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
           </div>
         </div>
 
-      </div>
+        <!-- Submit Button -->
+        <button type="submit" class="auth-btn-primary">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>{% if mode == 'admin' %}Enter Admin Console{% else %}Sign In{% endif %}</span>
+        </button>
 
-      <!-- Security Notice Footer -->
-      <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.78rem; color: var(--text-dim);">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fa-solid fa-lock text-emerald"></i>
-          <span>Protected by SHA-256 Consensus & ISO 17025 Digital Signatures</span>
-        </div>
-        <div>
-          <span>HoneyChain Consortium &bull; Single-Link Architecture</span>
-        </div>
-      </div>
+        <!-- Demo Quick-Fill Accounts Pills -->
+        <div class="demo-accounts-section">
+          <div class="demo-title">
+            <span>Quick Demo Fill</span>
+            <span style="font-weight: 400; text-transform: none;">Click to test</span>
+          </div>
 
+          {% if mode == 'admin' %}
+            <div class="demo-pills">
+              <button type="button" class="demo-pill demo-pill-admin" onclick="fillCredentials('admin@honeychain.local', 'Admin@123')">
+                <i class="fa-solid fa-user-shield"></i> Consortium Admin (Admin@123)
+              </button>
+            </div>
+          {% else %}
+            <div class="demo-pills">
+              <button type="button" class="demo-pill" onclick="fillCredentials('beekeeper@honeychain.io', 'beekeeper123')">
+                🐝 Beekeeper
+              </button>
+              <button type="button" class="demo-pill" onclick="fillCredentials('lab@honeychain.io', 'lab123')">
+                🧪 Laboratory
+              </button>
+              <button type="button" class="demo-pill" onclick="fillCredentials('packager@honeychain.io', 'packager123')">
+                📦 Packager
+              </button>
+              <button type="button" class="demo-pill" onclick="fillCredentials('seller@honeychain.io', 'seller123')">
+                🏪 Seller
+              </button>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Links between User & Admin login -->
+        <div class="auth-footer">
+          {% if mode == 'admin' %}
+            <span>Looking for member login?</span>
+            <a href="{{ url_for('login', mode='user') }}">Switch to User Login</a>
+          {% else %}
+            <span>Are you a system administrator?</span>
+            <a href="{{ url_for('login', mode='admin') }}">Admin Portal &rarr;</a>
+            <div style="margin-top: 10px;">
+              Don't have an account? <a href="{{ url_for('register') }}">Create an Account</a>
+            </div>
+          {% endif %}
+          <br>
+          <a href="{{ url_for('index') }}" style="font-size: 0.82rem; color: #6B7280; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-arrow-left"></i> Return to Welcome Page
+          </a>
+        </div>
+      </form>
     </div>
-  </main>
+  </div>
 
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script>
-    // 1-Click Quick Login
-    function quickLogin(email, password) {
-      document.getElementById('identifier').value = email;
-      document.getElementById('password').value = password;
-      const form = document.getElementById('login-form');
-      form.submit();
+    function fillCredentials(id, pw) {
+      document.getElementById('identifier').value = id;
+      document.getElementById('password').value = pw;
     }
 
-    // Toggle Password Visibility
-    function togglePasswordVisibility() {
-      const pwInput = document.getElementById('password');
-      const toggleBtn = document.getElementById('toggle-pw-btn');
-      if (pwInput.type === 'password') {
-        pwInput.type = 'text';
-        toggleBtn.classList.remove('fa-eye');
-        toggleBtn.classList.add('fa-eye-slash');
-      } else {
-        pwInput.type = 'password';
-        toggleBtn.classList.remove('fa-eye-slash');
-        toggleBtn.classList.add('fa-eye');
+    function openForgotPasswordPrompt() {
+      const email = prompt("Enter your registered email address to receive password reset instructions:");
+      if (email && email.trim()) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "{{ url_for('forgot_password') }}";
+        
+        const emailInput = document.createElement("input");
+        emailInput.type = "hidden";
+        emailInput.name = "email";
+        emailInput.value = email.trim();
+        form.appendChild(emailInput);
+
+        const newPassInput = document.createElement("input");
+        newPassInput.type = "hidden";
+        newPassInput.name = "new_password";
+        newPassInput.value = "HoneyPass@2026";
+        form.appendChild(newPassInput);
+
+        document.body.appendChild(form);
+        form.submit();
       }
     }
   </script>
-
 </body>
 </html>

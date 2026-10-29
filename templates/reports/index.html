@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Reports &amp; Analytics — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="reports-page" style="max-width: 1400px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+        <i class="fa-solid fa-chart-pie"></i> Supply Chain Reports &amp; Analytics
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        Generate traceability audit summaries, monitor QA compliance, and export ledger datasets.
+      </p>
+    </div>
+
+    <div>
+      <a href="{{ url_for('export_batches_csv') }}" class="btn-primary" style="width: auto; padding: 9px 20px; font-size: 0.9rem; text-decoration: none;">
+        <i class="fa-solid fa-file-csv"></i> Export Batches (CSV)
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary Statistics Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px;">
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 20px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Total Honey Volume</span>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #F4B400; margin-top: 4px;">{{ total_kg or 0 }} kg</div>
+    </div>
+
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 20px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Average Purity Score</span>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #10B981; margin-top: 4px;">{{ "%.1f"|format(avg_purity) if avg_purity else 'N/A' }}{% if avg_purity %}%{% endif %}</div>
+    </div>
+
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 20px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Average Moisture Level</span>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #3B82F6; margin-top: 4px;">{{ "%.1f"|format(avg_moisture) if avg_moisture else 'N/A' }}{% if avg_moisture %}%{% endif %}</div>
+    </div>
+
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 20px;">
+      <span style="font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700;">Total Blockchain Blocks</span>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #8B5CF6; margin-top: 4px;">{{ total_blocks or 1 }}</div>
+    </div>
+  </div>
+
+  <!-- Batches Ledger Table -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 24px;">
+    <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #F4B400;">
+      Comprehensive Traceability Log
+    </h3>
+
+    {% if batches and batches|length > 0 %}
+      <div style="overflow-x: auto;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="background: #2A1F18; color: #F4B400; text-align: left; border-bottom: 2px solid #4A2C16;">
+              <th style="padding: 10px;">Batch ID</th>
+              <th style="padding: 10px;">Product</th>
+              <th style="padding: 10px;">Beekeeper</th>
+              <th style="padding: 10px;">Harvest Date</th>
+              <th style="padding: 10px;">Stage</th>
+              <th style="padding: 10px;">Purity</th>
+              <th style="padding: 10px;">Tamper Seal</th>
+              <th style="padding: 10px;">Seller</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in batches %}
+              <tr style="border-bottom: 1px solid #2E2017;">
+                <td style="padding: 10px; font-weight: 700; color: #F4B400;">{{ b.batch_id }}</td>
+                <td style="padding: 10px; color: #FFF8E7;">{{ b.product_name }}</td>
+                <td style="padding: 10px; color: #D1D5DB;">{{ b.beekeeper_name }}</td>
+                <td style="padding: 10px; color: #9CA3AF;">{{ b.harvest_date }}</td>
+                <td style="padding: 10px;">
+                  <span style="background: rgba(244, 180, 0, 0.15); color: #F4B400; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                    Stage {{ b.stage_num }}
+                  </span>
+                </td>
+                <td style="padding: 10px; color: #10B981; font-weight: 700;">{{ b.purity_score ~ '%' if b.purity_score else '-' }}</td>
+                <td style="padding: 10px; color: #FFF8E7;">{{ b.tamper_seal_id or '-' }}</td>
+                <td style="padding: 10px; color: #D1D5DB;">{{ b.seller_name or '-' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 40px 20px; color: #9CA3AF;">
+        <h4 style="font-size: 1.05rem; color: #FFF8E7; margin: 0 0 6px 0; font-weight: 700;">
+          No records found. Add a new record to get started.
+        </h4>
+        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">
+          Audit metrics and reports will populate automatically once honey batches are registered.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+

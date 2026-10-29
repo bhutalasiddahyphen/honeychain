@@ -202,19 +202,19 @@ def generate_certificate_pdf(batch, stage_updates, blocks, qr_image_path=None):
     lab_data = [
         [
             Paragraph("Testing Laboratory:", cell_label),
-            Paragraph(str(batch.get('lab_name', 'Eurofins Accredited Testing Lab')), cell_value),
+            Paragraph(str(batch.get('lab_name', 'Pending Testing')), cell_value),
             Paragraph("Purity Assay Score:", cell_label),
             Paragraph(f"<b><font color='#059669'>{purity_str}</font></b>", cell_value)
         ],
         [
             Paragraph("Certificate Number:", cell_label),
-            Paragraph(str(batch.get('certificate_no', 'CERT-CH-2026-9912')), cell_value),
+            Paragraph(str(batch.get('certificate_no', 'N/A')), cell_value),
             Paragraph("Moisture Content:", cell_label),
             Paragraph(moisture_str, cell_value)
         ],
         [
             Paragraph("Quality Inspector:", cell_label),
-            Paragraph(str(batch.get('inspector_name', 'Dr. Beatrice Keller')), cell_value),
+            Paragraph(str(batch.get('inspector_name', 'Pending Inspector')), cell_value),
             Paragraph("HMF Enzyme Level:", cell_label),
             Paragraph(hmf_str, cell_value)
         ],
@@ -249,27 +249,27 @@ def generate_certificate_pdf(batch, stage_updates, blocks, qr_image_path=None):
     pack_data = [
         [
             Paragraph("Packaging Facility:", cell_label),
-            Paragraph(str(batch.get('packaging_plant', 'Helvetia Artisan Bottlers')), cell_value),
+            Paragraph(str(batch.get('packaging_plant', 'Pending Packaging')), cell_value),
             Paragraph("Authorized Retailer:", cell_label),
-            Paragraph(str(batch.get('seller_name', 'AlpenGourmet Flagship Boutique')), cell_value)
+            Paragraph(str(batch.get('seller_name', 'Pending Distribution')), cell_value)
         ],
         [
             Paragraph("Container & Jar Format:", cell_label),
-            Paragraph(str(batch.get('jar_format', '500g Amber Glass Jar')), cell_value),
+            Paragraph(str(batch.get('jar_format', 'Standard Container')), cell_value),
             Paragraph("Store Location:", cell_label),
-            Paragraph(str(batch.get('store_location', 'Bahnhofstrasse 42, Zurich')), cell_value)
+            Paragraph(str(batch.get('store_location', 'N/A')), cell_value)
         ],
         [
             Paragraph("Tamper-Proof Seal ID:", cell_label),
-            Paragraph(f"<b><font color='#2563eb'>{batch.get('tamper_seal_id', 'SEAL-2026-CH')}</font></b>", cell_value),
+            Paragraph(f"<b><font color='#2563eb'>{batch.get('tamper_seal_id', 'PENDING')}</font></b>", cell_value),
             Paragraph("Retail Food License:", cell_label),
-            Paragraph(str(batch.get('license_no', 'ZH-FOOD-88120')), cell_value)
+            Paragraph(str(batch.get('license_no', 'N/A')), cell_value)
         ],
         [
             Paragraph("Production Lot No:", cell_label),
-            Paragraph(str(batch.get('lot_number', 'LOT-VALAIS-2026')), cell_value),
+            Paragraph(str(batch.get('lot_number', 'N/A')), cell_value),
             Paragraph("Retail Price & Status:", cell_label),
-            Paragraph(f"{batch.get('sale_price', 'CHF 28.50')} &bull; {batch.get('retail_status', 'On Shelf')}", cell_value)
+            Paragraph(f"{batch.get('sale_price', 'N/A')} &bull; {batch.get('retail_status', 'Pending')}", cell_value)
         ]
     ]
 

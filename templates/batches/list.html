@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Honey Batches — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="batches-page" style="max-width: 1400px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #F4B400;">
+        <i class="fa-solid fa-boxes-stacked"></i> Honey Batch Management
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        Complete registry of honey batches moving across the 4-stage supply chain.
+      </p>
+    </div>
+
+    <a href="{{ url_for('create_batch') }}" class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.92rem; text-decoration: none;">
+      <i class="fa-solid fa-plus"></i> Register New Honey Batch
+    </a>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div style="background: #1E1611; border: 1px solid #3E291B; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;">
+    <form action="{{ url_for('batches') }}" method="GET" style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 220px;">
+        <input 
+          type="text" 
+          name="q" 
+          value="{{ search_query or '' }}" 
+          placeholder="Search by Batch ID, Beekeeper, or Floral Source..."
+          style="width: 100%; padding: 10px 14px; background: #251B14; border: 1px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.9rem; box-sizing: border-box;"
+        >
+      </div>
+
+      <div style="min-width: 180px;">
+        <select name="stage" style="width: 100%; padding: 10px 14px; background: #251B14; border: 1px solid #4A2C16; border-radius: 8px; color: #FFF8E7; font-size: 0.9rem;">
+          <option value="">All Stages</option>
+          <option value="1" {% if selected_stage == '1' %}selected{% endif %}>Stage 1: Harvested</option>
+          <option value="2" {% if selected_stage == '2' %}selected{% endif %}>Stage 2: Lab Tested</option>
+          <option value="3" {% if selected_stage == '3' %}selected{% endif %}>Stage 3: Packaged</option>
+          <option value="4" {% if selected_stage == '4' %}selected{% endif %}>Stage 4: Retail Shelf</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary" style="width: auto; padding: 10px 18px;">
+        <i class="fa-solid fa-filter"></i> Filter
+      </button>
+
+      {% if search_query or selected_stage %}
+        <a href="{{ url_for('batches') }}" style="display: inline-flex; align-items: center; color: #9CA3AF; padding: 10px 14px; font-size: 0.88rem; text-decoration: none;">
+          Clear Filters
+        </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Batches Table Card -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+    {% if batches and batches|length > 0 %}
+      <div style="overflow-x: auto;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+          <thead>
+            <tr style="background: #2A1F18; color: #F4B400; text-align: left; border-bottom: 2px solid #4A2C16;">
+              <th style="padding: 12px;">Batch ID</th>
+              <th style="padding: 12px;">Product Details</th>
+              <th style="padding: 12px;">Beekeeper &amp; Apiary</th>
+              <th style="padding: 12px;">Harvest Date</th>
+              <th style="padding: 12px;">Quantity (kg)</th>
+              <th style="padding: 12px;">Stage Status</th>
+              <th style="padding: 12px; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in batches %}
+              <tr style="border-bottom: 1px solid #2E2017;">
+                <td style="padding: 12px; font-weight: 700; color: #F4B400;">
+                  <a href="{{ url_for('batch_details', batch_id=b.batch_id) }}" style="color: #F4B400; text-decoration: none;">
+                    {{ b.batch_id }}
+                  </a>
+                </td>
+                <td style="padding: 12px;">
+                  <div style="font-weight: 600; color: #FFF8E7;">{{ b.product_name }}</div>
+                  <div style="font-size: 0.78rem; color: #9CA3AF;">{{ b.floral_source }}</div>
+                </td>
+                <td style="padding: 12px;">
+                  <div style="color: #FFF8E7;">{{ b.beekeeper_name }}</div>
+                  <div style="font-size: 0.78rem; color: #9CA3AF;">{{ b.apiary_name }} ({{ b.origin_location }})</div>
+                </td>
+                <td style="padding: 12px; color: #9CA3AF;">{{ b.harvest_date }}</td>
+                <td style="padding: 12px; color: #FFF8E7;">{{ b.quantity_kg }} kg</td>
+                <td style="padding: 12px;">
+                  {% if b.stage_num == 1 %}
+                    <span style="background: rgba(245, 158, 11, 0.2); color: #F59E0B; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                      Stage 1: Harvested
+                    </span>
+                  {% elif b.stage_num == 2 %}
+                    <span style="background: rgba(16, 185, 129, 0.2); color: #10B981; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                      Stage 2: Lab Tested
+                    </span>
+                  {% elif b.stage_num == 3 %}
+                    <span style="background: rgba(59, 130, 246, 0.2); color: #3B82F6; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                      Stage 3: Packaged
+                    </span>
+                  {% else %}
+                    <span style="background: rgba(139, 92, 246, 0.2); color: #8B5CF6; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                      Stage 4: Retail Shelf
+                    </span>
+                  {% endif %}
+                </td>
+                <td style="padding: 12px; text-align: right;">
+                  <a href="{{ url_for('trace_batch', batch_id=b.batch_id) }}" class="btn-sm" style="background: #4A2C16; color: #F4B400; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; margin-right: 6px;" title="Customer Public QR Trace">
+                    <i class="fa-solid fa-qrcode"></i> Trace
+                  </a>
+                  <a href="{{ url_for('batch_details', batch_id=b.batch_id) }}" class="btn-sm" style="background: #251B14; color: #FFF8E7; border: 1px solid #4A2C16; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem;" title="View Details">
+                    <i class="fa-solid fa-eye"></i> Details
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <!-- Empty State -->
+      <div style="text-align: center; padding: 50px 20px; color: #9CA3AF;">
+        <div style="font-size: 3rem; color: #F4B400; margin-bottom: 14px;">
+          <i class="fa-solid fa-box-open"></i>
+        </div>
+        <h4 style="font-size: 1.15rem; color: #FFF8E7; margin: 0 0 8px 0; font-weight: 700;">
+          No records found. Add a new record to get started.
+        </h4>
+        <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 20px auto; color: #6B7280;">
+          Create a honey batch to initiate cryptographic provenance tracking on the blockchain ledger.
+        </p>
+        <a href="{{ url_for('create_batch') }}" class="btn-primary" style="display: inline-flex; width: auto; padding: 10px 22px; font-size: 0.92rem; text-decoration: none;">
+          <i class="fa-solid fa-plus"></i> Register First Batch
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

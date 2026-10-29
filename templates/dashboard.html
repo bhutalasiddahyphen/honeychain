@@ -1,258 +1,269 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Command Center & Blockchain Explorer - HoneyChain</title>
-  <meta name="description" content="Decentralized dashboard displaying all verified honey batches, 5-block lifecycle stages, and raw blockchain ledger blocks.">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f59e0b">
-  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="/static/icons/favicon.png">
-</head>
-<body>
+{% extends "base.html" %}
 
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="container nav-container">
-      <a href="{{ url_for('index') }}" class="brand-logo">
-        <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
-        <div class="brand-text">
-          <span class="brand-name">Honey<span>Chain</span></span>
-          <span class="brand-tagline">5-Block Ledger Architecture</span>
+{% block title %}Dashboard — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="clean-dashboard" style="max-width: 1360px; margin: 0 auto; padding: 24px 0;">
+
+  <!-- Page Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+    <div>
+      <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: #D97706; letter-spacing: 0.5px; margin-bottom: 2px;">
+        Provenance Control Center
+      </div>
+      <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #111827;">
+        HoneyChain Management Dashboard
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #6B7280; font-size: 0.88rem;">
+        Real-time telemetry, 4-stage supply chain verification, and cryptographic block minting.
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="{{ url_for('create_batch') }}" class="btn-primary" style="background: #F59E0B; color: #1A0F09; font-weight: 700; padding: 9px 18px; border-radius: 8px; text-decoration: none; font-size: 0.88rem; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-plus"></i> Register New Batch
+      </a>
+      <a href="{{ url_for('qr_scan') }}" style="background: #FFFFFF; border: 1px solid #D1D5DB; color: #374151; font-weight: 600; padding: 9px 16px; border-radius: 8px; text-decoration: none; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-camera"></i> Scan Batch QR
+      </a>
+    </div>
+  </div>
+
+  <!-- 6 Clean Telemetry Metric Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 26px;">
+    
+    <!-- Total Batches -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: transform 0.15s ease;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; letter-spacing: 0.5px;">Total Batches</span>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #111827; margin-top: 4px;">{{ stats.total_batches if stats else 0 }}</div>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 6px;">Recorded in ledger</div>
+    </div>
+
+    <!-- Registered Beekeepers -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; letter-spacing: 0.5px;">Beekeepers</span>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #059669; margin-top: 4px;">{{ stats.registered_beekeepers if stats else 0 }}</div>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #D1FAE5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 6px;">Verified apiaries</div>
+    </div>
+
+    <!-- Completed Lab Tests -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; letter-spacing: 0.5px;">Lab Tested</span>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #2563EB; margin-top: 4px;">{{ stats.completed_lab_tests if stats else 0 }}</div>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #DBEAFE; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+          <i class="fa-solid fa-flask-vial"></i>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 6px;">NMR purity signed</div>
+    </div>
+
+    <!-- Packaged Batches -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; letter-spacing: 0.5px;">Packaged</span>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #7C3AED; margin-top: 4px;">{{ stats.packaged_batches if stats else 0 }}</div>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #EDE9FE; color: #7C3AED; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+          <i class="fa-solid fa-box-open"></i>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 6px;">Tamper seals &amp; QR</div>
+    </div>
+
+    <!-- Active Sellers -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; letter-spacing: 0.5px;">Active Sellers</span>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #DB2777; margin-top: 4px;">{{ stats.active_sellers if stats else 0 }}</div>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #FCE7F3; color: #DB2777; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+          <i class="fa-solid fa-store"></i>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 6px;">Retail shelf arrivals</div>
+    </div>
+
+    <!-- Blockchain Records -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; letter-spacing: 0.5px;">Ledger Blocks</span>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #D97706; margin-top: 4px;">{{ stats.blockchain_records if stats else 1 }}</div>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+          <i class="fa-solid fa-cubes"></i>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: #059669; font-weight: 600; margin-top: 6px;">
+        <i class="fa-solid fa-circle-check"></i> SHA-256 Validated
+      </div>
+    </div>
+  </div>
+
+  <!-- Clean 4-Stage Supply Chain Pipeline Progress Bar -->
+  <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 22px 26px; margin-bottom: 26px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+    <h3 style="margin: 0 0 18px 0; font-size: 0.95rem; font-weight: 800; color: #111827; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-timeline" style="color: #F59E0B;"></i>
+      4-Stage Provenance Lifecycle
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;" class="pipeline-steps-grid">
+      <!-- Stage 1 -->
+      <a href="{{ url_for('stages_beekeeper') }}" style="text-decoration: none; color: inherit;">
+        <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.15s ease;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto; font-weight: 800; font-size: 0.88rem;">
+            1
+          </div>
+          <div style="font-weight: 700; color: #111827; font-size: 0.88rem;">Beekeeper</div>
+          <div style="font-size: 0.75rem; color: #6B7280; margin-top: 2px;">Apiary &amp; Harvest</div>
         </div>
       </a>
 
-      <ul class="nav-links">
-        <li><a href="{{ url_for('index') }}" class="nav-link"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="{{ url_for('dashboard') }}" class="nav-link active"><i class="fa-solid fa-cubes"></i> Blockchain Explorer</a></li>
-        <li><a href="{{ url_for('register') }}" class="nav-cta"><i class="fa-solid fa-plus-circle"></i> Register Batch (Block 1)</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- Flash Notifications -->
-  <div class="container flash-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message flash-{{ category }}" role="alert">
-            <span><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
+      <!-- Stage 2 -->
+      <a href="{{ url_for('stages_laboratory') }}" style="text-decoration: none; color: inherit;">
+        <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.15s ease;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #DBEAFE; color: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto; font-weight: 800; font-size: 0.88rem;">
+            2
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+          <div style="font-weight: 700; color: #111827; font-size: 0.88rem;">Laboratory</div>
+          <div style="font-size: 0.75rem; color: #6B7280; margin-top: 2px;">Purity &amp; NMR Assay</div>
+        </div>
+      </a>
+
+      <!-- Stage 3 -->
+      <a href="{{ url_for('stages_packer') }}" style="text-decoration: none; color: inherit;">
+        <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.15s ease;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #EDE9FE; color: #7C3AED; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto; font-weight: 800; font-size: 0.88rem;">
+            3
+          </div>
+          <div style="font-weight: 700; color: #111827; font-size: 0.88rem;">Packer</div>
+          <div style="font-size: 0.75rem; color: #6B7280; margin-top: 2px;">Tamper Seal &amp; QR</div>
+        </div>
+      </a>
+
+      <!-- Stage 4 -->
+      <a href="{{ url_for('stages_seller') }}" style="text-decoration: none; color: inherit;">
+        <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.15s ease;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #FCE7F3; color: #DB2777; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto; font-weight: 800; font-size: 0.88rem;">
+            4
+          </div>
+          <div style="font-weight: 700; color: #111827; font-size: 0.88rem;">Seller</div>
+          <div style="font-size: 0.75rem; color: #6B7280; margin-top: 2px;">Retail Shelf &amp; Price</div>
+        </div>
+      </a>
+    </div>
   </div>
 
-  <main class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
-    
-    <!-- Header -->
-    <div class="section-header" style="margin-bottom: 2rem;">
-      <div>
-        <h1 style="font-size: 2.2rem; margin-bottom: 0.3rem;">
-          <i class="fa-solid fa-network-wired text-honey"></i> HoneyChain Command Center
-        </h1>
-        <p>Monitor batches through the 5-block lifecycle and inspect raw SHA-256 blocks.</p>
-      </div>
-
-      <div style="display: flex; gap: 0.75rem;">
-        <a href="{{ url_for('register') }}" class="btn btn-primary" id="btn-add-batch">
-          <i class="fa-solid fa-plus"></i> New Harvest (Block 1)
-        </a>
-        <a href="{{ url_for('api_get_chain') }}" target="_blank" class="btn btn-secondary">
-          <i class="fa-solid fa-code"></i> JSON Ledger
-        </a>
-      </div>
+  <!-- Recent Honey Batches Clean Table Card -->
+  <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 22px 26px; margin-bottom: 26px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #F3F4F6; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+      <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #111827; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-boxes-stacked" style="color: #F59E0B;"></i>
+        Recent Honey Batches
+      </h3>
+      <a href="{{ url_for('batches') }}" style="color: #D97706; font-size: 0.85rem; text-decoration: none; font-weight: 600;">
+        View All Batches &rarr;
+      </a>
     </div>
 
-    <!-- 4-Stage Lifecycle Pipeline Stats -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
-      <div class="glass-card" style="border-top: 3px solid #f59e0b; padding: 1.25rem;">
-        <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Block 1: Batch Registered</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #fbbf24; margin: 0.25rem 0;">{{ stats.stage_1_count }}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">Apiary Harvest Logged</div>
-      </div>
-
-      <div class="glass-card" style="border-top: 3px solid #10b981; padding: 1.25rem;">
-        <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Block 2: Lab Test Recorded</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #34d399; margin: 0.25rem 0;">{{ stats.stage_2_count }}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">Chemical Purity Certified</div>
-      </div>
-
-      <div class="glass-card" style="border-top: 3px solid #3b82f6; padding: 1.25rem;">
-        <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Block 3: Packaging Recorded</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #60a5fa; margin: 0.25rem 0;">{{ stats.stage_3_count }}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">Bottled & Seal Sealed</div>
-      </div>
-
-      <div class="glass-card" style="border-top: 3px solid #8b5cf6; padding: 1.25rem;">
-        <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Block 4: Seller Recorded</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #a78bfa; margin: 0.25rem 0;">{{ stats.stage_4_count }}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">On Retail Shelf Authenticated</div>
-      </div>
-    </div>
-
-    <!-- Chain Status Alert -->
-    <div class="glass-card" style="margin-bottom: 2.5rem; border-color: rgba(16, 185, 129, 0.35); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <span class="badge badge-verified" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-          <i class="fa-solid fa-shield-check"></i> {{ validation_msg }}
-        </span>
-        <span style="font-size: 0.88rem; color: var(--text-muted);">
-          Consensus: Proof-of-Work (PoW) &bull; Total Blocks: <strong>{{ blocks|length }}</strong>
-        </span>
-      </div>
-      <div style="font-size: 0.82rem; color: var(--text-dim);">
-        Target Difficulty: 2 Leading Zeros
-      </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="tabs-header">
-      <button class="tab-btn active" id="tab-btn-batches" onclick="switchTab('batches')">
-        <i class="fa-solid fa-jar"></i> Honey Batches ({{ batches|length }})
-      </button>
-      <button class="tab-btn" id="tab-btn-blocks" onclick="switchTab('blocks')">
-        <i class="fa-solid fa-cubes"></i> Blockchain Explorer ({{ blocks|length }} Blocks)
-      </button>
-    </div>
-
-    <!-- Tab 1: Honey Batches Table -->
-    <div id="tab-content-batches" class="tab-content">
-      <div class="glass-card" style="padding: 0; overflow: hidden;">
-        <div class="table-responsive">
-          <table class="styled-table" id="batches-table">
-            <thead>
-              <tr>
-                <th>Batch ID</th>
-                <th>Honey Product</th>
-                <th>Floral Source</th>
-                <th>Apiary Origin</th>
-                <th>Lifecycle Block Stage</th>
-                <th>Purity</th>
-                <th>Harvest Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for batch in batches %}
-              <tr>
-                <td>
-                  <a href="{{ url_for('trace_batch', batch_id=batch.batch_id) }}" class="hash-tag" style="font-weight: 700;">
+    {% if batches and batches|length > 0 %}
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="background: #F9FAFB; color: #4B5563; text-align: left; border-bottom: 1px solid #E5E7EB;">
+              <th style="padding: 10px 14px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Batch ID</th>
+              <th style="padding: 10px 14px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Product &amp; Floral Origin</th>
+              <th style="padding: 10px 14px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Beekeeper</th>
+              <th style="padding: 10px 14px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Harvest Date</th>
+              <th style="padding: 10px 14px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Stage Status</th>
+              <th style="padding: 10px 14px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for batch in batches[:6] %}
+              <tr style="border-bottom: 1px solid #F3F4F6;">
+                <td style="padding: 12px 14px; font-weight: 700; color: #D97706;">
+                  <a href="{{ url_for('batch_details', batch_id=batch.batch_id) }}" style="color: #D97706; text-decoration: none;">
                     {{ batch.batch_id }}
                   </a>
                 </td>
-                <td style="font-weight: 600; color: #fff;">{{ batch.product_name }}</td>
-                <td><span class="badge badge-honey">{{ batch.floral_source }}</span></td>
-                <td>
-                  <div style="font-size: 0.85rem;">{{ batch.apiary_name }}</div>
-                  <div style="font-size: 0.75rem; color: var(--text-dim);">{{ batch.origin_location }}</div>
+                <td style="padding: 12px 14px;">
+                  <div style="font-weight: 600; color: #111827;">{{ batch.product_name }}</div>
+                  <div style="font-size: 0.78rem; color: #6B7280;">{{ batch.floral_source }}</div>
                 </td>
-                <td>
-                  {% if batch.stage_num == 1 %}
-                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">Block 1: Registered</span>
-                  {% elif batch.stage_num == 2 %}
-                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Block 2: Lab Tested</span>
-                  {% elif batch.stage_num == 3 %}
-                    <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">Block 3: Packaged</span>
-                  {% elif batch.stage_num == 4 %}
-                    <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">Block 4: At Seller</span>
-                  {% endif %}
+                <td style="padding: 12px 14px; color: #374151;">{{ batch.beekeeper_name }}</td>
+                <td style="padding: 12px 14px; color: #6B7280;">{{ batch.harvest_date }}</td>
+                <td style="padding: 12px 14px;">
+                  <span style="background: #FEF3C7; color: #92400E; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                    Stage {{ batch.stage_num }}: {{ batch.current_stage }}
+                  </span>
                 </td>
-                <td>
-                  {% if batch.purity_score %}
-                    <span style="font-weight: 700; color: var(--emerald-400);">{{ batch.purity_score }}%</span>
-                  {% else %}
-                    <span style="font-size: 0.78rem; color: var(--text-dim);">Pending Lab</span>
-                  {% endif %}
-                </td>
-                <td style="font-size: 0.82rem; color: var(--text-dim);">{{ batch.harvest_date }}</td>
-                <td>
-                  <a href="{{ url_for('trace_batch', batch_id=batch.batch_id) }}" class="btn btn-primary btn-sm">
-                    <i class="fa-solid fa-shield-halved"></i> Trace
+                <td style="padding: 12px 14px; text-align: right;">
+                  <a href="{{ url_for('trace_batch', batch_id=batch.batch_id) }}" style="background: #F3F4F6; color: #1F2937; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 600; margin-right: 6px;">
+                    <i class="fa-solid fa-qrcode"></i> Trace
+                  </a>
+                  <a href="{{ url_for('batch_details', batch_id=batch.batch_id) }}" style="background: #FEF3C7; color: #92400E; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 700;">
+                    Details
                   </a>
                 </td>
               </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <!-- Required Clean Empty State -->
+      <div style="text-align: center; padding: 46px 20px; color: #6B7280;">
+        <div style="font-size: 2.8rem; color: #F59E0B; margin-bottom: 12px;">
+          <i class="fa-solid fa-box-open"></i>
         </div>
+        <h4 style="font-size: 1.1rem; color: #111827; margin: 0 0 6px 0; font-weight: 700;">
+          No records found. Add a new record to get started.
+        </h4>
+        <p style="font-size: 0.85rem; max-width: 440px; margin: 0 auto 18px auto; color: #9CA3AF;">
+          Start your honey traceability workflow by registering an apiary harvest with the Beekeeper module.
+        </p>
+        <a href="{{ url_for('create_batch') }}" style="display: inline-flex; background: #F59E0B; color: #1A0F09; font-weight: 700; padding: 9px 20px; border-radius: 8px; text-decoration: none; font-size: 0.88rem;">
+          <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Register First Batch
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Blockchain Genesis Integrity Banner -->
+  <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: #D1FAE5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div>
+        <div style="font-weight: 700; color: #111827; font-size: 0.92rem;">Cryptographic Ledger Integrity: 100% Intact</div>
+        <div style="font-size: 0.78rem; color: #6B7280;">SHA-256 Proof-of-Work consensus verified. Block 0 Genesis active.</div>
       </div>
     </div>
+    <a href="{{ url_for('blockchain_records') }}" style="color: #D97706; font-size: 0.85rem; text-decoration: none; font-weight: 700;">
+      Inspect Ledger on Explorer &rarr;
+    </a>
+  </div>
 
-    <!-- Tab 2: Blockchain Explorer -->
-    <div id="tab-content-blocks" class="tab-content" style="display: none;">
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-        Cryptographic ledger recording all 5 block types in chronological order: Genesis &bull; Batch Registration &bull; Lab Test &bull; Honey Packaging &bull; Seller Information.
-      </p>
-
-      {% for block in blocks|reverse %}
-      <div class="block-card">
-        <div class="block-meta">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span class="badge badge-honey" style="font-size: 0.8rem; font-family: var(--font-mono);">
-              Block #{{ block.index }}
-            </span>
-            <span class="badge" style="
-              {% if 'Genesis' in block.block_type %}background: rgba(100, 116, 139, 0.2); color: #cbd5e1;
-              {% elif 'Batch' in block.block_type %}background: rgba(245, 158, 11, 0.2); color: #fbbf24;
-              {% elif 'Lab' in block.block_type %}background: rgba(16, 185, 129, 0.2); color: #34d399;
-              {% elif 'Packaging' in block.block_type %}background: rgba(59, 130, 246, 0.2); color: #60a5fa;
-              {% elif 'Seller' in block.block_type %}background: rgba(139, 92, 246, 0.2); color: #a78bfa;
-              {% else %}background: rgba(255, 255, 255, 0.1); color: #fff;{% endif %}
-            ">
-              {{ block.block_type }}
-            </span>
-          </div>
-          <span style="font-size: 0.78rem; color: var(--text-dim);">
-            <i class="fa-regular fa-clock"></i> {{ block.timestamp }} &bull; Nonce: <strong>{{ block.nonce }}</strong>
-          </span>
-        </div>
-
-        <div class="block-hash-row" style="margin-bottom: 0.75rem;">
-          <div>
-            <span style="color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase;">Block Hash:</span>
-            <span class="hash-tag" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--emerald-400);">
-              {{ block.hash }}
-            </span>
-          </div>
-          <div>
-            <span style="color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase;">Previous Hash:</span>
-            <span class="hash-tag">{{ block.previous_hash }}</span>
-          </div>
-        </div>
-
-        <div style="background: rgba(0, 0, 0, 0.4); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono); overflow-x: auto;">
-          <pre style="margin: 0; font-family: inherit; font-size: inherit; color: #cbd5e1; white-space: pre-wrap;">{{ block.data | pretty_json }}</pre>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-
-  </main>
-
-  <script>
-    function switchTab(tabName) {
-      const batchesTab = document.getElementById('tab-content-batches');
-      const blocksTab = document.getElementById('tab-content-blocks');
-      const btnBatches = document.getElementById('tab-btn-batches');
-      const btnBlocks = document.getElementById('tab-btn-blocks');
-
-      if (tabName === 'batches') {
-        batchesTab.style.display = 'block';
-        blocksTab.style.display = 'none';
-        btnBatches.classList.add('active');
-        btnBlocks.classList.remove('active');
-      } else {
-        batchesTab.style.display = 'none';
-        blocksTab.style.display = 'block';
-        btnBatches.classList.remove('active');
-        btnBlocks.classList.add('active');
-      }
-    }
-  </script>
-
-</body>
-</html>
+</div>
+{% endblock %}

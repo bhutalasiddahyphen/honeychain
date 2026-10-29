@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Stage 4: Seller &amp; Retail — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="stage-page" style="max-width: 1400px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #EC4899;">
+        <i class="fa-solid fa-store"></i> Stage 4: Retail Shelf &amp; Distribution
+      </h1>
+      <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+        Record retail arrival, shelf placement, and authenticate store locations into Block 4.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 28px;">
+    
+    <!-- Retail Form Card -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #EC4899; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-shop"></i> Record Retail Shelf Arrival
+      </h3>
+
+      <form action="{{ url_for('stages_seller') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+
+        <!-- Select Batch ID -->
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Select Packaged Batch *</label>
+          <select name="batch_id" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #F4B400; font-weight: 700; font-size: 0.88rem; box-sizing: border-box;">
+            <option value="">-- Choose Batch Awaiting Retail --</option>
+            {% for b in pending_batches %}
+              <option value="{{ b.batch_id }}" {% if selected_batch_id == b.batch_id %}selected{% endif %}>
+                {{ b.batch_id }} &mdash; {{ b.product_name }} ({{ b.tamper_seal_id }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Retail Store / Seller Name *</label>
+          <input type="text" name="seller_name" placeholder="e.g. Organic Naturals Market" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Store Location / Address *</label>
+          <input type="text" name="store_location" placeholder="e.g. 5th Avenue, New York, NY, USA" required style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Seller License No</label>
+            <input type="text" name="license_no" placeholder="e.g. NY-RET-9921" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Retail Price</label>
+            <input type="text" name="sale_price" placeholder="e.g. $24.50" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #F4B400; font-weight: 700; font-size: 0.88rem; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #FFF8E7; margin-bottom: 4px;">Shelf Arrival Date</label>
+          <input type="date" name="shelf_arrival_date" value="{{ today_date }}" style="width: 100%; padding: 9px 12px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #FFF8E7; font-size: 0.88rem; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 10px; font-size: 0.92rem; background: #EC4899; border: none;">
+          <i class="fa-solid fa-cube"></i> Mine Block 4 &amp; Authenticate Retail
+        </button>
+      </form>
+    </div>
+
+    <!-- Authenticated Retail Batches Table -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 22px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #EC4899; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-store"></i> Retail Authenticated Batches (Block 4 Ledger)
+      </h3>
+
+      {% if seller_batches and seller_batches|length > 0 %}
+        <div style="overflow-x: auto;">
+          <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <thead>
+              <tr style="background: #2A1F18; color: #EC4899; text-align: left; border-bottom: 2px solid #4A2C16;">
+                <th style="padding: 10px;">Batch ID</th>
+                <th style="padding: 10px;">Seller Name</th>
+                <th style="padding: 10px;">Store Location</th>
+                <th style="padding: 10px;">Arrival Date</th>
+                <th style="padding: 10px;">Price</th>
+                <th style="padding: 10px; text-align: right;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in seller_batches %}
+                <tr style="border-bottom: 1px solid #2E2017;">
+                  <td style="padding: 10px; font-weight: 700; color: #F4B400;">{{ b.batch_id }}</td>
+                  <td style="padding: 10px; color: #FFF8E7; font-weight: 600;">{{ b.seller_name }}</td>
+                  <td style="padding: 10px; color: #D1D5DB;">{{ b.store_location }}</td>
+                  <td style="padding: 10px; color: #9CA3AF;">{{ b.shelf_arrival_date }}</td>
+                  <td style="padding: 10px; color: #F4B400; font-weight: 700;">{{ b.sale_price }}</td>
+                  <td style="padding: 10px; text-align: right;">
+                    <span style="background: rgba(16, 185, 129, 0.2); color: #10B981; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                      <i class="fa-solid fa-check-circle"></i> {{ b.retail_status }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <!-- Required Clean Empty State -->
+        <div style="text-align: center; padding: 40px 20px; color: #9CA3AF;">
+          <div style="font-size: 2.5rem; color: #EC4899; margin-bottom: 10px;">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <h4 style="font-size: 1.05rem; color: #FFF8E7; margin: 0 0 6px 0; font-weight: 700;">
+            No records found. Add a new record to get started.
+          </h4>
+          <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">
+            Complete packaging first, then authenticate retail store arrival here.
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+

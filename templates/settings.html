@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-sliders"></i> Application Settings</h1>
+    <p class="page-subtitle">Configure blockchain parameters, consortium identity, and network preferences</p>
+  </div>
+</div>
+
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-gear"></i> Consortium &amp; Blockchain Configuration</h2>
+  <form action="{{ url_for('settings_page') }}" method="POST" class="auth-form">
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label" for="consortium_name"><i class="fa-solid fa-crown"></i> Consortium Official Name</label>
+        <input type="text" id="consortium_name" name="consortium_name" class="form-input" value="{{ settings.get('consortium_name', 'International Pure Honey & Bee Protection Consortium') }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="blockchain_difficulty"><i class="fa-solid fa-hashtag"></i> Mining Difficulty (PoW Leading Zeros)</label>
+        <select id="blockchain_difficulty" name="blockchain_difficulty" class="form-input">
+          <option value="1" {% if settings.get('blockchain_difficulty') == '1' %}selected{% endif %}>Difficulty 1 (Instant Testing - '0...')</option>
+          <option value="2" {% if settings.get('blockchain_difficulty') == '2' or not settings.get('blockchain_difficulty') %}selected{% endif %}>Difficulty 2 (Balanced - '00...')</option>
+          <option value="3" {% if settings.get('blockchain_difficulty') == '3' %}selected{% endif %}>Difficulty 3 (High Security - '000...')</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid-2" style="margin-top: 14px;">
+      <div class="form-group">
+        <label class="form-label" for="currency"><i class="fa-solid fa-money-bill-wave"></i> Preferred Currency Symbol</label>
+        <input type="text" id="currency" name="currency" class="form-input" value="{{ settings.get('currency', 'USD ($)') }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="qr_resolution"><i class="fa-solid fa-qrcode"></i> QR Label Resolution</label>
+        <select id="qr_resolution" name="qr_resolution" class="form-input">
+          <option value="Standard (150 DPI)" {% if '150' in settings.get('qr_resolution', '') %}selected{% endif %}>Standard (150 DPI)</option>
+          <option value="High (300 DPI)" {% if '300' in settings.get('qr_resolution', '') or not settings.get('qr_resolution') %}selected{% endif %}>High (300 DPI - Recommended for Printing)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; text-align: right;">
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+        <i class="fa-solid fa-floppy-disk"></i> Update Settings
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Maintenance & Danger Zone -->
+<div class="honey-card" style="border: 1px solid #fed7aa; background: #fffbeb;">
+  <h2 class="card-title" style="color: #9a3412;"><i class="fa-solid fa-triangle-exclamation" style="color: #ea580c;"></i> Blockchain Ledger &amp; Data Cleanup</h2>
+  <p style="font-size: 0.88rem; color: #7c2d12; margin-bottom: 16px;">
+    Reset and purge all module data across beekeepers, batches, laboratory certificates, packaging records, seller inventory, and QR codes. Blockchain ledger will be reset to Block 0 (Genesis Block) ready for fresh entry.
+  </p>
+  <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+    <form action="{{ url_for('reset_ledger_action') }}" method="POST" onsubmit="return confirm('Reset all module records to clean Genesis Block 0? All beekeepers, batches, lab tests, packaging, and seller records will be purged.');">
+      <input type="hidden" name="with_samples" value="0">
+      <button type="submit" class="btn-primary" style="background: #24150d; color: #ffd166; width: auto; padding: 11px 22px; font-size: 0.88rem;">
+        <i class="fa-solid fa-broom"></i> Purge All Records &amp; Reset to Clean Genesis (0 Records)
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

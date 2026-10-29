@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Block #{{ block.index }} Details — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="block-details-page" style="max-width: 900px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="margin-bottom: 24px;">
+    <a href="{{ url_for('blockchain_records') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Blockchain Explorer
+    </a>
+    <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+      <i class="fa-solid fa-cube"></i> Block #{{ block.index }}: {{ block.block_type }}
+    </h1>
+    <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+      Mined at {{ block.timestamp }} with Nonce {{ block.nonce }}
+    </p>
+  </div>
+
+  <!-- Block Metadata Card -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 24px; margin-bottom: 24px;">
+    <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #F4B400;">
+      Cryptographic Header
+    </h3>
+
+    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem;">
+      <div>
+        <strong style="color: #9CA3AF; display: block; margin-bottom: 4px;">SHA-256 Current Block Hash:</strong>
+        <code style="display: block; background: #251B14; padding: 8px 12px; border-radius: 6px; color: #10B981; word-break: break-all;">
+          {{ block.hash }}
+        </code>
+      </div>
+
+      <div>
+        <strong style="color: #9CA3AF; display: block; margin-bottom: 4px;">Previous Block Hash (Parent Link):</strong>
+        <code style="display: block; background: #251B14; padding: 8px 12px; border-radius: 6px; color: #9CA3AF; word-break: break-all;">
+          {{ block.previous_hash }}
+        </code>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div>
+          <strong style="color: #9CA3AF;">Proof of Work Nonce:</strong>
+          <div style="color: #F4B400; font-weight: 700; margin-top: 2px;">{{ block.nonce }}</div>
+        </div>
+        <div>
+          <strong style="color: #9CA3AF;">Ledger Timestamp:</strong>
+          <div style="color: #FFF8E7; margin-top: 2px;">{{ block.timestamp }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Raw JSON Payload Card -->
+  <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #F4B400;">
+        Immutable Data Payload (JSON)
+      </h3>
+      <button type="button" class="btn-sm copy-hash-btn" data-hash="{{ block.data | tojson(indent=2) }}" style="background: #251B14; color: #F4B400; border: 1px solid #4A2C16; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+        <i class="fa-solid fa-copy"></i> Copy JSON
+      </button>
+    </div>
+
+    <pre style="background: #140E0A; padding: 18px; border-radius: 8px; color: #FFF8E7; font-family: monospace; font-size: 0.85rem; overflow-x: auto; margin: 0; border: 1px solid #2E2017;">{{ block.data | tojson(indent=2) }}</pre>
+  </div>
+
+</div>
+{% endblock %}
+

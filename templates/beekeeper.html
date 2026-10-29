@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Step 1: Beekeeper Management{% endblock %}
+
+{% block content %}
+<!-- Step-by-Step Pipeline Wizard -->
+{% set current_step = 1 %}
+{% include "step_wizard.html" %}
+
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-seedling"></i> Step 1: Beekeeper Management</h1>
+    <p class="page-subtitle">Register and oversee authenticated apiary producers across the consortium</p>
+  </div>
+</div>
+
+<!-- Step 1 Completion Card: Proceeds to Step 2 -->
+{% if request.args.get('step_completed') == '1' %}
+  <div class="step-next-card">
+    <div class="step-next-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="step-next-text">
+      <h4>Step 1 Completed: Beekeeper &amp; Apiary Successfully Registered!</h4>
+      <p>
+        Apiary <strong>"{{ request.args.get('apiary_name', '') }}"</strong> is now recorded.
+        Proceed to Step 2 to register a honey harvest batch for this apiary and mint Block 1 onto the blockchain.
+      </p>
+    </div>
+    <a href="{{ url_for('batches', beekeeper_name=request.args.get('beekeeper_name', ''), apiary_name=request.args.get('apiary_name', ''), origin_location=request.args.get('location', '')) }}" class="btn-primary step-next-btn">
+      Proceed to Step 2: Honey Batch Management &rarr;
+    </a>
+  </div>
+{% endif %}
+
+<!-- Register New Beekeeper Form -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-plus-circle"></i> Register New Beekeeper &amp; Apiary</h2>
+  <form action="{{ url_for('beekeeper') }}" method="POST">
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label" for="beekeeper_id"><i class="fa-solid fa-hashtag"></i> Beekeeper ID</label>
+        <input type="text" id="beekeeper_id" name="beekeeper_id" class="form-input" value="{{ suggested_id }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="name"><i class="fa-solid fa-user"></i> Beekeeper Full Name</label>
+        <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Master Beekeeper Name" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="apiary_name"><i class="fa-solid fa-tree"></i> Apiary Name</label>
+        <input type="text" id="apiary_name" name="apiary_name" class="form-input" placeholder="e.g. Mountain Meadow Apiary" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="location"><i class="fa-solid fa-map-location-dot"></i> Geographic Location</label>
+        <input type="text" id="location" name="location" class="form-input" placeholder="e.g. Alpine Valley Region" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="hives_count"><i class="fa-solid fa-cubes-stacked"></i> Number of Active Hives</label>
+        <input type="number" id="hives_count" name="hives_count" class="form-input" placeholder="e.g. 50" min="1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="license_no"><i class="fa-solid fa-certificate"></i> Apiary License No.</label>
+        <input type="text" id="license_no" name="license_no" class="form-input" placeholder="e.g. LIC-AP-1001" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="phone"><i class="fa-solid fa-phone"></i> Contact Phone</label>
+        <input type="text" id="phone" name="phone" class="form-input" placeholder="e.g. +1 555-0100">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email"><i class="fa-solid fa-envelope"></i> Contact Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="e.g. apiary@honeychain.io">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="honey_varieties"><i class="fa-solid fa-jar"></i> Honey Floral Varieties</label>
+        <input type="text" id="honey_varieties" name="honey_varieties" class="form-input" placeholder="e.g. Wildflower, Clover, Acacia">
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <span style="font-size: 0.88rem; color: var(--text-muted);">
+        <i class="fa-solid fa-info-circle"></i> Once registered, you will proceed directly to Step 2 to register a honey batch.
+      </span>
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+        <i class="fa-solid fa-shield-check"></i> Register &amp; Proceed to Step 2 &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Registered Beekeepers Directory -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Registered Beekeepers Directory</h2>
+  <div class="table-responsive">
+    <table class="honey-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Beekeeper Name</th>
+          <th>Apiary Name</th>
+          <th>Location</th>
+          <th>Hives</th>
+          <th>Varieties</th>
+          <th>Step 2 Action</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if beekeepers %}
+          {% for b in beekeepers %}
+            <tr>
+              <td><span class="code-hash">{{ b.beekeeper_id }}</span></td>
+              <td><strong>{{ b.name }}</strong></td>
+              <td>{{ b.apiary_name }}</td>
+              <td><i class="fa-solid fa-location-dot" style="color: var(--gold-600);"></i> {{ b.location }}</td>
+              <td><span class="badge badge-gold">{{ b.hives_count }} Hives</span></td>
+              <td>{{ b.honey_varieties or 'Various' }}</td>
+              <td>
+                <a href="{{ url_for('batches', beekeeper_name=b.name, apiary_name=b.apiary_name, origin_location=b.location) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">
+                  <i class="fa-solid fa-cube"></i> Create Batch (Step 2) &rarr;
+                </a>
+              </td>
+              <td>
+                <form action="{{ url_for('delete_beekeeper', beekeeper_id=b.beekeeper_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Remove this beekeeper record?');">
+                  <button type="submit" style="background: none; border: none; color: #e11d48; cursor: pointer; font-size: 0.95rem;" title="Delete Beekeeper">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="table-empty">No records found. Add a new record to get started.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

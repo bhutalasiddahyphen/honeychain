@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Step 2: Honey Batch Management{% endblock %}
+
+{% block content %}
+<!-- Step-by-Step Pipeline Wizard -->
+{% set current_step = 2 %}
+{% include "step_wizard.html" %}
+
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-boxes-stacked"></i> Step 2: Honey Batch Management</h1>
+    <p class="page-subtitle">Create honey batch IDs and record origin harvest data into the blockchain (Block 1)</p>
+  </div>
+</div>
+
+<!-- Step 2 Completion Card: Proceeds to Step 3 -->
+{% if request.args.get('step_completed') == '2' %}
+  <div class="step-next-card">
+    <div class="step-next-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="step-next-text">
+      <h4>Step 2 Completed: Honey Batch {{ request.args.get('batch_id', '') }} Registered &amp; Block 1 Mined!</h4>
+      <p>
+        The harvest origin is cryptographically locked into Block 1 on the ledger.
+        Proceed to Step 3 to record laboratory quality and purity testing results.
+      </p>
+    </div>
+    <a href="{{ url_for('laboratory', batch_id=request.args.get('batch_id', '')) }}" class="btn-primary step-next-btn">
+      Proceed to Step 3: Laboratory Testing &rarr;
+    </a>
+  </div>
+{% endif %}
+
+<!-- Mint Block 1 Form -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-cube"></i> Create Batch &amp; Mint Block 1 (Harvest Origin)</h2>
+  <form action="{{ url_for('batches') }}" method="POST">
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label" for="batch_id"><i class="fa-solid fa-barcode"></i> Batch ID (Unique)</label>
+        <input type="text" id="batch_id" name="batch_id" class="form-input" value="{{ suggested_id }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="product_name"><i class="fa-solid fa-tag"></i> Product Label Name</label>
+        <input type="text" id="product_name" name="product_name" class="form-input" placeholder="e.g. Pure Mountain Honey" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="floral_source"><i class="fa-solid fa-seedling"></i> Floral Botanical Source</label>
+        <input type="text" id="floral_source" name="floral_source" class="form-input" placeholder="e.g. Wildflower, Clover" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="apiary_name"><i class="fa-solid fa-tree"></i> Producing Apiary</label>
+        <input type="text" id="apiary_name" name="apiary_name" class="form-input" value="{{ request.args.get('apiary_name', '') }}" placeholder="e.g. Apiary Name" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="beekeeper_name"><i class="fa-solid fa-user"></i> Master Beekeeper Name</label>
+        <input type="text" id="beekeeper_name" name="beekeeper_name" class="form-input" value="{{ request.args.get('beekeeper_name', '') }}" placeholder="e.g. Beekeeper Name" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="origin_location"><i class="fa-solid fa-map-pin"></i> Origin Coordinates / Region</label>
+        <input type="text" id="origin_location" name="origin_location" class="form-input" value="{{ request.args.get('origin_location', '') }}" placeholder="e.g. Harvest Origin Location" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="harvest_date"><i class="fa-solid fa-calendar"></i> Harvest Date</label>
+        <input type="date" id="harvest_date" name="harvest_date" class="form-input" value="{{ today_date }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="quantity_kg"><i class="fa-solid fa-weight-scale"></i> Harvest Quantity (kg)</label>
+        <input type="number" id="quantity_kg" name="quantity_kg" class="form-input" placeholder="e.g. 200.0" step="0.5" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="extraction_method"><i class="fa-solid fa-filter"></i> Extraction Method</label>
+        <select id="extraction_method" name="extraction_method" class="form-input">
+          <option value="Unheated Cold Centrifugation">Unheated Cold Centrifugation (Raw)</option>
+          <option value="Traditional Comb Pressing">Traditional Comb Pressing</option>
+          <option value="Natural Gravity Drip Extraction">Natural Gravity Drip Extraction</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <span style="font-size: 0.88rem; color: var(--text-muted);">
+        <i class="fa-solid fa-info-circle"></i> Submitting will mine Block 1 and allow proceeding to Step 3 (Laboratory Testing).
+      </span>
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+        <i class="fa-solid fa-cubes"></i> Mint Block 1 &amp; Proceed to Step 3 &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Batches Table -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Honey Batches Inventory</h2>
+  <div class="table-responsive">
+    <table class="honey-table">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Product Name</th>
+          <th>Apiary &amp; Beekeeper</th>
+          <th>Harvest Date</th>
+          <th>Current Lifecycle Stage</th>
+          <th>Quantity</th>
+          <th>Next Step Action</th>
+          <th>QR Code</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if batches %}
+          {% for b in batches %}
+            <tr>
+              <td><span class="code-hash">{{ b.batch_id }}</span></td>
+              <td><strong>{{ b.product_name }}</strong><br><small style="color: var(--text-muted);">{{ b.floral_source }}</small></td>
+              <td>{{ b.apiary_name }}<br><small style="color: var(--text-muted);">{{ b.beekeeper_name }}</small></td>
+              <td>{{ b.harvest_date }}</td>
+              <td>
+                {% if b.stage_num == 1 %}
+                  <span class="badge badge-stage-1"><i class="fa-solid fa-seedling"></i> Block 1: Apiary</span>
+                {% elif b.stage_num == 2 %}
+                  <span class="badge badge-stage-2"><i class="fa-solid fa-flask"></i> Block 2: Lab Certified</span>
+                {% elif b.stage_num == 3 %}
+                  <span class="badge badge-stage-3"><i class="fa-solid fa-box"></i> Block 3: Packaged</span>
+                {% elif b.stage_num >= 4 %}
+                  <span class="badge badge-stage-4"><i class="fa-solid fa-shop"></i> Block 4: Retail Shelf</span>
+                {% endif %}
+              </td>
+              <td>{{ b.quantity_kg }} kg</td>
+              <td>
+                {% if b.stage_num == 1 %}
+                  <a href="{{ url_for('laboratory', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #059669;">
+                    <i class="fa-solid fa-flask"></i> Step 3: Test Lab &rarr;
+                  </a>
+                {% elif b.stage_num == 2 %}
+                  <a href="{{ url_for('packer', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #2563eb;">
+                    <i class="fa-solid fa-box"></i> Step 4: Package &rarr;
+                  </a>
+                {% elif b.stage_num == 3 %}
+                  <a href="{{ url_for('seller', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #7c3aed;">
+                    <i class="fa-solid fa-shop"></i> Step 5: Retail &rarr;
+                  </a>
+                {% else %}
+                  <a href="{{ url_for('track_honey', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #059669;">
+                    <i class="fa-solid fa-route"></i> Trace Journey
+                  </a>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('qr_generator', batch_id=b.batch_id) }}" title="View QR Code">
+                  <i class="fa-solid fa-qrcode" style="font-size: 1.4rem; color: var(--gold-600);"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="table-empty">No records found. Add a new record to get started.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code Generator — HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="qr-gen-page" style="max-width: 900px; margin: 0 auto; padding: 20px 0;">
+
+  <!-- Header -->
+  <div style="margin-bottom: 24px;">
+    <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #F4B400;">
+      <i class="fa-solid fa-qrcode"></i> Honey Batch QR Code Generator
+    </h1>
+    <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.9rem;">
+      Generate, preview, and download high-resolution traceability QR codes for honey jar labels.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    
+    <!-- Left: Select Batch Form -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 24px;">
+      <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #F4B400;">
+        Select Batch
+      </h3>
+
+      <form action="{{ url_for('qr_generator') }}" method="GET">
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #FFF8E7; margin-bottom: 6px;">
+            Choose Registered Honey Batch
+          </label>
+          <select name="batch_id" onchange="this.form.submit()" style="width: 100%; padding: 11px 14px; background: #251B14; border: 1px solid #4A2C16; border-radius: 8px; color: #F4B400; font-weight: 700; font-size: 0.92rem;">
+            <option value="">-- Choose a Batch --</option>
+            {% for b in all_batches %}
+              <option value="{{ b.batch_id }}" {% if current_batch and current_batch.batch_id == b.batch_id %}selected{% endif %}>
+                {{ b.batch_id }} &mdash; {{ b.product_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {% if current_batch %}
+          <div style="font-size: 0.85rem; color: #9CA3AF; line-height: 1.6; background: #251B14; padding: 14px; border-radius: 8px; border: 1px solid #3E291B;">
+            <div><strong style="color: #FFF8E7;">Floral Source:</strong> {{ current_batch.floral_source }}</div>
+            <div><strong style="color: #FFF8E7;">Beekeeper:</strong> {{ current_batch.beekeeper_name }}</div>
+            <div><strong style="color: #FFF8E7;">Current Stage:</strong> {{ current_batch.current_stage }}</div>
+            <div><strong style="color: #FFF8E7;">Blockchain Hash:</strong> <code style="color: #10B981; font-size: 0.75rem;">{{ current_batch.tx_hash[:20] }}...</code></div>
+          </div>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Right: Generated QR Preview & Actions -->
+    <div class="card" style="background: #1E1611; border: 1px solid #3E291B; border-radius: 14px; padding: 24px; text-align: center;">
+      {% if current_batch %}
+        <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 700; color: #F4B400;">
+          Traceability QR Code
+        </h3>
+
+        <!-- QR Image in White Background Box -->
+        <div style="background: #FFFFFF; padding: 18px; border-radius: 12px; display: inline-block; margin-bottom: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.3);">
+          <img src="{{ url_for('static', filename='qrcodes/' + current_batch.qr_code_image) }}" alt="QR for {{ current_batch.batch_id }}" style="width: 200px; height: 200px; display: block;">
+        </div>
+
+        <!-- Encoded URL -->
+        <div style="margin-bottom: 18px;">
+          <label style="font-size: 0.78rem; text-transform: uppercase; color: #9CA3AF; font-weight: 700; display: block; margin-bottom: 4px;">Encoded Public Trace URL</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="traceUrlInput" readonly value="{{ trace_url }}" style="flex: 1; padding: 8px 10px; background: #251B14; border: 1px solid #4A2C16; border-radius: 6px; color: #10B981; font-size: 0.78rem;">
+            <button type="button" class="btn-sm copy-hash-btn" data-hash="{{ trace_url }}" style="background: #4A2C16; color: #FFF8E7; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Download & Print Buttons -->
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <a href="{{ url_for('static', filename='qrcodes/' + current_batch.qr_code_image) }}" download="{{ current_batch.batch_id }}.png" class="btn-primary" style="width: auto; padding: 9px 18px; font-size: 0.88rem; text-decoration: none;">
+            <i class="fa-solid fa-download"></i> Download PNG
+          </a>
+          <button type="button" onclick="window.print()" class="btn-secondary" style="width: auto; padding: 9px 16px; font-size: 0.88rem; background: #251B14; border: 1px solid #4A2C16; color: #FFF8E7; cursor: pointer;">
+            <i class="fa-solid fa-print"></i> Print Label
+          </button>
+        </div>
+      {% else %}
+        <div style="padding: 40px 10px; color: #9CA3AF;">
+          <i class="fa-solid fa-qrcode" style="font-size: 3rem; color: #4A2C16; margin-bottom: 12px; display: block;"></i>
+          <h4 style="color: #FFF8E7; margin: 0 0 6px 0;">No Batch Selected</h4>
+          <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">
+            Select a batch from the dropdown to preview and download its consumer QR code.
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+

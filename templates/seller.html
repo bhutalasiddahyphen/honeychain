@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Step 5: Seller Management{% endblock %}
+
+{% block content %}
+<!-- Step-by-Step Pipeline Wizard -->
+{% set current_step = 5 %}
+{% include "step_wizard.html" %}
+
+<div class="page-header">
+  <div class="page-title-group">
+    <h1 class="page-title"><i class="fa-solid fa-shop"></i> Step 5: Seller Management</h1>
+    <p class="page-subtitle">Track authorized retail boutique arrivals, shelf placement, and mint Block 4 into the blockchain</p>
+  </div>
+</div>
+
+<!-- Step 5 Grand Completion Card: Lifecycle Complete -->
+{% if request.args.get('step_completed') == '5' %}
+  <div class="step-next-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac;">
+    <div class="step-next-icon" style="color: #16a34a;"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="step-next-text">
+      <h4 style="color: #166534;">Step 5 Completed: Batch {{ request.args.get('batch_id', '') }} is on the Retail Shelf &amp; Block 4 Mined!</h4>
+      <p style="color: #15803d;">
+        The entire 4-stage blockchain supply chain (Beekeeper &rarr; Laboratory &rarr; Packer &rarr; Seller) is 100% verified and sealed!
+        You can now generate its QR code or view its immutable provenance journey.
+      </p>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="{{ url_for('track_honey', batch_id=request.args.get('batch_id', '')) }}" class="btn-primary step-next-btn">
+        <i class="fa-solid fa-route"></i> Track Journey &rarr;
+      </a>
+      <a href="{{ url_for('qr_generator', batch_id=request.args.get('batch_id', '')) }}" class="btn-primary step-next-btn" style="background: var(--brown-850);">
+        <i class="fa-solid fa-qrcode"></i> Generate QR Code &rarr;
+      </a>
+      <a href="{{ url_for('blockchain_records') }}" class="btn-primary step-next-btn" style="background: var(--gold-700);">
+        <i class="fa-solid fa-link"></i> View Blockchain &rarr;
+      </a>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Record Retail Arrival Form -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-cart-flatbed"></i> Record Retail Shelf Arrival &amp; Mint Block 4</h2>
+  <form action="{{ url_for('seller') }}" method="POST">
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label" for="batch_id"><i class="fa-solid fa-barcode"></i> Select Honey Batch</label>
+        <select id="batch_id" name="batch_id" class="form-input" required>
+          <option value="">-- Choose Batch for Retail Arrival --</option>
+          {% for b in batches %}
+            <option value="{{ b.batch_id }}" {% if b.batch_id == selected_batch_id %}selected{% endif %}>
+              {{ b.batch_id }} - {{ b.product_name }} (Stage {{ b.stage_num }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="seller_name"><i class="fa-solid fa-store"></i> Authorized Retail Boutique Name</label>
+        <input type="text" id="seller_name" name="seller_name" class="form-input" placeholder="e.g. Authorized Retail Boutique" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="store_location"><i class="fa-solid fa-map-location-dot"></i> Store Physical Location</label>
+        <input type="text" id="store_location" name="store_location" class="form-input" placeholder="e.g. Store Physical Location" required>
+      </div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
+        <label class="form-label" for="license_no"><i class="fa-solid fa-id-badge"></i> Retail License No.</label>
+        <input type="text" id="license_no" name="license_no" class="form-input" placeholder="e.g. LIC-FOOD-1001" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="sale_price"><i class="fa-solid fa-tag"></i> Retail Price per Jar</label>
+        <input type="text" id="sale_price" name="sale_price" class="form-input" placeholder="e.g. $45.00" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="shelf_arrival_date"><i class="fa-solid fa-calendar"></i> Shelf Arrival Date</label>
+        <input type="date" id="shelf_arrival_date" name="shelf_arrival_date" class="form-input" value="{{ today_date }}" required>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <span style="font-size: 0.88rem; color: var(--text-muted);">
+        <i class="fa-solid fa-info-circle"></i> This final step mints Block 4 and completes the full provenance chain.
+      </span>
+      <button type="submit" class="btn-primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+        <i class="fa-solid fa-store-check"></i> Mint Block 4 &amp; Authenticate On Shelf &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Retail Batches Registry Table -->
+<div class="honey-card">
+  <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Retail Shelf &amp; Boutique Inventory</h2>
+  <div class="table-responsive">
+    <table class="honey-table">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Product Name</th>
+          <th>Retail Seller</th>
+          <th>Store Location</th>
+          <th>Shelf Price</th>
+          <th>Retail Status</th>
+          <th>Full Journey</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if seller_batches %}
+          {% for b in seller_batches %}
+            <tr>
+              <td><span class="code-hash">{{ b.batch_id }}</span></td>
+              <td><strong>{{ b.product_name }}</strong></td>
+              <td>{{ b.seller_name }}</td>
+              <td><i class="fa-solid fa-location-dot" style="color: var(--gold-600);"></i> {{ b.store_location }}</td>
+              <td><strong style="color: var(--gold-700);">{{ b.sale_price or '$48.00' }}</strong></td>
+              <td>
+                <span class="badge badge-stage-4"><i class="fa-solid fa-circle-check"></i> On Shelf &amp; Authenticated</span>
+              </td>
+              <td>
+                <a href="{{ url_for('track_honey', batch_id=b.batch_id) }}" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: #059669;">
+                  <i class="fa-solid fa-route"></i> Track Journey &rarr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="table-empty">No records found. Add a new record to get started.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
