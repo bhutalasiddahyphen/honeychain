@@ -52,32 +52,85 @@
 
 ---
 
-## 📂 Project Structure
+## 📂 Complete Project Directory Structure (Section 8 Standard)
 
 ```text
-HONEY CHAIN/
-├── .env.example              # Production environment variable template (no real secrets)
-├── .gitignore                # Protects secrets, local SQLite DB, virtualenvs & caches
-├── Procfile                  # Production process definition for Gunicorn WSGI server
-├── render.yaml               # Render Infrastructure-as-Code Blueprint configuration
-├── requirements.txt          # Python dependencies (Flask, Gunicorn, QRCode, Pillow, etc.)
-├── run.bat                   # 1-click Windows local runner
-├── share_online.bat          # 1-click Cloudflare/Ngrok tunnel helper for quick mobile testing
-├── open_firewall.bat         # Windows Defender Firewall helper for LAN Wi-Fi testing
+HONEY-CHAIN/
 │
-├── app.py                    # Main Flask application (routes, auth, QR generation, PWA endpoints)
-├── blockchain.py             # SHA-256 Proof-of-Work blockchain engine & database auditor
-├── database.py               # SQLite schema, Werkzeug password hashing, baseline data seeding
-├── pdf_generator.py          # ReportLab PDF certificate generator
+├── app.py                      # Core Flask Application & API routing
+├── requirements.txt            # Python dependencies (Flask, QRCode, Pillow, etc.)
+├── config.py                   # Centralized Configuration & Environment Settings
+├── README.md                   # Full System Documentation & Responsive Testing Guide
 │
-├── static/
-│   ├── manifest.json         # Web App Manifest for mobile installation
-│   ├── sw.js                 # Production-safe Service Worker (offline fallback, asset cache)
-│   ├── style.css             # Mobile-responsive design system, dark mode & touch utilities
-│   ├── icons/                # PWA high-res icons (192px, 512px, maskable, apple-touch-icon)
-│   │   ├── favicon.png
-│   │   ├── icon-192.png
-│   │   ├── icon-512.png
+├── blockchain/                 # Blockchain Engine Package
+│   ├── __init__.py             # Exports Block and Blockchain
+│   └── blockchain.py           # Custom SHA-256 Proof-of-Work Blockchain implementation
+│
+├── database/                   # Database Storage Package
+│   ├── __init__.py             # Package init & re-exports
+│   ├── database.py             # SQLite CRUD, transactions, schema migration, auth
+│   └── models.py               # Data models (User, Batch, Stage, Block)
+│
+├── routes/                     # Modular Feature Blueprints
+│   ├── __init__.py             # Blueprint register helper
+│   ├── auth.py                 # Login, Admin Portal, Google SSO, Register, Logout
+│   ├── dashboard.py            # Operational metrics, telemetry, and activity
+│   ├── beekeeper.py            # Stage 1: Apiary registration & honey harvesting
+│   ├── laboratory.py           # Stage 2: Quality testing, purity %, NMR, HMF
+│   ├── packer.py               # Stage 3: Bottling, tamper-evident seals, lot numbers
+│   ├── seller.py               # Stage 4: Retail store arrival, pricing, shelf status
+│   ├── qr_code.py              # QR Code generation, printing, and live mobile camera scanner
+│   └── traceability.py         # Full 5-stage provenance timeline & blockchain verification
+│
+├── utils/                      # Helper & Validation Utilities
+│   ├── __init__.py             # Package exports
+│   ├── qr_generator.py         # High-resolution QR code generator with brand styling
+│   └── validators.py           # Field, purity, moisture, and date validators
+│
+├── templates/                  # Jinja2 HTML Templates (Fully Responsive)
+│   ├── base.html               # Universal base layout with responsive sidebar & hamburger
+│   ├── login.html              # Responsive login page (User, Admin, Google SSO)
+│   ├── register.html           # Responsive registration form
+│   ├── dashboard.html          # Metric cards, pipeline progress, and quick actions
+│   ├── beekeeper.html          # Beekeeper management view
+│   ├── laboratory.html         # Laboratory testing view
+│   ├── packer.html             # Packer & bottling view
+│   ├── seller.html             # Seller & retail shelf view
+│   ├── blockchain.html         # Blockchain ledger explorer & verification
+│   ├── qr_code.html            # QR Code generation hub & camera scanner
+│   └── traceability.html       # 5-stage supply chain timeline & blockchain proof
+│
+├── static/                     # Static Web Assets
+│   ├── css/
+│   │   ├── style.css           # Core theme styles (Amber #F59E0B & Honey Brown #4A2C16)
+│   │   ├── responsive.css      # Master responsive stylesheet (Desktop, Tablet, Mobile)
+│   │   └── login.css           # Clean modern login styles
+│   ├── js/
+│   │   ├── main.js             # General UI interactivity & mobile drawer
+│   │   ├── dashboard.js        # Telemetry updates & interactive charts
+│   │   └── qr_scanner.js       # HTML5 video camera QR scanner
+│   └── images/
+│       └── logo.png            # Official HoneyChain logo
+│
+└── instance/
+    └── honeychain.db           # SQLite persistent storage (auto-created on first run)
+```
+
+---
+
+## 📱 Multi-Device Responsive Testing (Section 10)
+
+The application features **one single responsive application** that adapts dynamically to all screen viewports:
+
+| Device Category | Target Resolution | Key Layout Behaviors |
+| :--- | :--- | :--- |
+| **Desktop Computers** | `1920 × 1080` | Fixed 270px left sidebar, 6-column metric telemetry, side-by-side forms |
+| **Laptops** | `1366 × 768` | Ergonomic sidebar, 6-card grid with auto-fit, full data tables |
+| **Android Tablets & iPads** | `768 × 1024` | Collapsible drawer, 3×2 medium metric cards, touch-scrollable tables |
+| **Mobile (iPhones)** | `390 × 844` | Off-canvas sliding hamburger drawer, 2-column stacked metrics, 44px+ touch targets |
+| **Small Mobile (Android)** | `360 × 640` | Full-width inputs, 16px iOS zoom-safe text, vertical flow, zero horizontal scroll |
+
+---
 │   │   ├── icon-maskable.png
 │   │   └── apple-touch-icon.png
 │   └── qrcodes/              # Auto-generated batch traceability QR code PNGs

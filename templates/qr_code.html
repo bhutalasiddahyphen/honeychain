@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code Generation & Scanner | HONEY CHAIN{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span class="badge badge-gold"><i class="fa-solid fa-qrcode"></i> SECTION 7 & 8</span>
+      <span class="badge badge-success"><i class="fa-solid fa-mobile-screen"></i> MOBILE CAMERA READY</span>
+    </div>
+    <h1 class="page-title" style="margin-top: 6px;"><i class="fa-solid fa-qrcode" style="color: var(--gold-500);"></i> Honey Batch QR Code Hub</h1>
+    <p class="page-subtitle">Generate cryptographic provenance QR codes, download jar labels, and scan with your phone's camera.</p>
+  </div>
+</div>
+
+<div class="form-grid-2" style="margin-bottom: 28px;">
+  <!-- ==================== TAB 1: QR CODE GENERATOR & LABEL ==================== -->
+  <div class="honey-card">
+    <div class="card-header" style="border-bottom: 1.5px solid var(--border-color); padding-bottom: 12px; margin-bottom: 18px;">
+      <h2 class="card-title" style="margin: 0;">
+        <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--gold-500);"></i> Generate Batch QR Code
+      </h2>
+      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Standard & MSME compliant</span>
+    </div>
+
+    <!-- Batch Selection Form -->
+    <form action="{{ url_for('qr_code_hub') if 'qr_code_hub' in request.endpoint or 'qr_code' in request.endpoint else url_for('qr_generator') }}" method="GET" class="auth-form" style="margin-bottom: 20px;">
+      <div class="form-group">
+        <label class="form-label" for="batch_id_select">
+          <i class="fa-solid fa-layer-group"></i> Select Registered Honey Batch
+        </label>
+        <select id="batch_id_select" name="batch_id" class="form-input" onchange="this.form.submit()">
+          <option value="">-- Choose from active batches --</option>
+          {% for b in batches %}
+            <option value="{{ b.batch_id }}" {% if b.batch_id == selected_batch_id %}selected{% endif %}>
+              {{ b.batch_id }} &mdash; {{ b.product_name }} (Stage {{ b.stage_num }}/4)
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="custom_id_input">
+          <i class="fa-solid fa-keyboard"></i> Or Type Custom Batch ID
+        </label>
+        <div style="display: flex; gap: 8px;">
+          <input 
+            type="text" 
+            id="custom_id_input" 
+            name="custom_id" 
+            class="form-input" 
+            placeholder="e.g. HONEY2026001" 
+            value="{{ selected_batch_id or '' }}"
+            style="text-transform: uppercase;"
+          >
+          <button type="submit" class="btn-primary" style="white-space: nowrap; width: auto; padding: 0 18px;">
+            <i class="fa-solid fa-arrows-rotate"></i> Load
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- QR Code Jar Label Card Preview -->
+    <div style="text-align: center; padding: 20px; background: var(--cream-50); border: 2px dashed var(--gold-400); border-radius: var(--radius-md);">
+      {% if selected_batch_id and qr_image %}
+        <div id="printableQrLabel" style="display: inline-block; padding: 18px; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(74,44,22,0.1); max-width: 100%;">
+          <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--brown-900); letter-spacing: 1px; margin-bottom: 4px;">
+            <i class="fa-solid fa-cube" style="color: var(--gold-500);"></i> HONEY CHAIN VERIFIED
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--gold-600); margin-bottom: 12px;">
+            {{ selected_batch_id }}
+          </div>
+
+          <img 
+            src="{{ url_for('static', filename='qrcodes/' + qr_image) }}" 
+            alt="Honey Batch QR Code {{ selected_batch_id }}" 
+            style="width: 210px; height: 210px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-color); padding: 6px; background: #fff;"
+            onerror="this.src='/static/images/logo.png'"
+          >
+
+          {% if batch_info %}
+            <div style="margin-top: 10px; font-size: 0.88rem; font-weight: 700; color: var(--brown-900);">
+              {{ batch_info.product_name }}
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+              {{ batch_info.origin_location or 'Pure Origin Certified' }} &bull; Stage {{ batch_info.stage_num }}/4
+            </div>
+          {% endif %}
+
+          <div style="margin-top: 10px; font-size: 0.75rem; color: var(--gold-700); font-weight: 600;">
+            <i class="fa-solid fa-shield-check"></i> SHA-256 Tamper-Proof Cryptographic Provenance
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <a 
+            href="{{ url_for('static', filename='qrcodes/' + qr_image) }}" 
+            download="{{ selected_batch_id }}-QR.png" 
+            class="btn-primary" 
+            style="width: auto; padding: 10px 20px; text-decoration: none;"
+          >
+            <i class="fa-solid fa-download"></i> Download QR PNG
+          </a>
+          <button 
+            type="button" 
+            onclick="window.print()" 
+            class="btn-secondary" 
+            style="width: auto; padding: 10px 20px;"
+          >
+            <i class="fa-solid fa-print"></i> Print Jar Label
+          </button>
+          <a 
+            href="{{ url_for('traceability', batch_id=selected_batch_id) if 'traceability' in request.endpoint else url_for('track_honey', batch_id=selected_batch_id) }}" 
+            class="btn-outline" 
+            style="width: auto; padding: 10px 18px; text-decoration: none;"
+          >
+            <i class="fa-solid fa-route"></i> View Journey
+          </a>
+        </div>
+      {% else %}
+        <div style="padding: 40px 20px; color: var(--text-muted);">
+          <i class="fa-solid fa-qrcode fa-3x" style="color: var(--gold-300); margin-bottom: 12px; display: block;"></i>
+          <p style="margin: 0; font-weight: 600;">No Batch Selected</p>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Select an existing honey batch or enter an ID above to generate its QR code.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: LIVE CAMERA QR SCANNER ==================== -->
+  <div class="honey-card">
+    <div class="card-header" style="border-bottom: 1.5px solid var(--border-color); padding-bottom: 12px; margin-bottom: 18px;">
+      <h2 class="card-title" style="margin: 0;">
+        <i class="fa-solid fa-camera" style="color: var(--gold-500);"></i> Camera QR Code Scanner
+      </h2>
+      <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> HTML5 Video</span>
+    </div>
+
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px;">
+      Point your iPhone, Android camera, or desktop webcam at any HoneyChain QR code to instantly verify authenticity.
+    </p>
+
+    <!-- Camera Selection (if multiple lenses present) -->
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="form-label" for="cameraSelect"><i class="fa-solid fa-video"></i> Select Video Device</label>
+      <select id="cameraSelect" class="form-input"></select>
+    </div>
+
+    <!-- Live Video Viewport Container -->
+    <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #111; border-radius: var(--radius-md); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <video id="qrVideo" playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+      <canvas id="qrCanvas" style="display: none;"></canvas>
+
+      <!-- Viewfinder Overlay Box -->
+      <div id="scanOverlay" style="display: none; position: absolute; inset: 15%; border: 3px solid var(--gold-400); border-radius: 16px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45); pointer-events: none;">
+        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold-500); color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">
+          SCANNING FOR HONEY BATCH
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner Status Message -->
+    <div id="scannerStatus" class="alert-message alert-info" style="margin-top: 14px; text-align: center; font-size: 0.88rem;">
+      Ready to scan. Click below to start your device's camera.
+    </div>
+
+    <!-- Scanner Action Controls -->
+    <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" id="startCameraBtn" class="btn-primary" style="flex: 1; min-height: 44px;">
+        <i class="fa-solid fa-camera"></i> Start Camera Scanner
+      </button>
+      <button type="button" id="stopCameraBtn" class="btn-secondary" style="flex: 1; min-height: 44px; display: none;">
+        <i class="fa-solid fa-stop"></i> Stop Camera
+      </button>
+    </div>
+
+    <!-- Manual Code Lookup Fallback -->
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+      <label class="form-label" for="manualBatchInput"><i class="fa-solid fa-magnifying-glass"></i> Or Lookup Batch Manually</label>
+      <form action="{{ url_for('traceability') if 'traceability' in request.endpoint else url_for('track_honey') }}" method="GET" style="display: flex; gap: 8px;">
+        <input 
+          type="text" 
+          id="manualBatchInput" 
+          name="batch_id" 
+          class="form-input" 
+          placeholder="e.g. HONEY2026001" 
+          required 
+          style="text-transform: uppercase;"
+        >
+        <button type="submit" class="btn-primary" style="width: auto; padding: 0 18px; white-space: nowrap;">
+          <i class="fa-solid fa-shield-check"></i> Verify
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== EXAMPLE DEMO BATCHES QUICK SELECT ==================== -->
+<div class="honey-card">
+  <h3 style="font-size: 1.05rem; font-family: var(--font-heading); color: var(--brown-900); margin-bottom: 12px;">
+    <i class="fa-solid fa-bolt" style="color: var(--gold-500);"></i> Quick Test Batches (Click to Load)
+  </h3>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="?batch_id=HONEY2026001" class="badge badge-gold" style="text-decoration: none; padding: 8px 14px; font-size: 0.85rem;">
+      <i class="fa-solid fa-qrcode"></i> HONEY2026001 (Specification Example)
+    </a>
+    {% for b in batches[:4] %}
+      <a href="?batch_id={{ b.batch_id }}" class="badge badge-gold" style="text-decoration: none; padding: 8px 14px; font-size: 0.85rem;">
+        <i class="fa-solid fa-cube"></i> {{ b.batch_id }} &bull; {{ b.product_name }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/qr_scanner.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof initQrScanner === "function") {
+      initQrScanner();
+    }
+  });
+</script>
+{% endblock %}

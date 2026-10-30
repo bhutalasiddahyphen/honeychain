@@ -15,6 +15,7 @@ from utils.helpers import (
     generate_digital_signature,
     safe_json_parse,
 )
+from utils.qr_generator import generate_qr_code, get_qr_filepath
 
 __all__ = [
     "validate_email",
@@ -27,5 +28,7 @@ __all__ = [
     "get_lan_ip",
     "generate_digital_signature",
     "safe_json_parse",
+    "generate_qr_code",
+    "get_qr_filepath",
 ]
 

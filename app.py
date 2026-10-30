@@ -976,8 +976,10 @@ def verify_chain_action():
     return redirect(url_for("blockchain_records"))
 
 
-# --- QR Code Generator ---
+# --- QR Code Generator & Label Preview ---
 @app.route("/qr-generator")
+@app.route("/qr_code")
+@app.route("/qr-code")
 @login_required
 def qr_generator():
     all_batches = database.get_all_batches()
@@ -990,19 +992,25 @@ def qr_generator():
     if batch_id:
         qr_image = generate_qr(batch_id, request.host_url)
 
+    from services.qr_service import QRService
+    qr_svc = QRService()
+    base_url = qr_svc.get_effective_base_url()
+    trace_url = f"{base_url}/traceability?batch_id={batch_id}" if batch_id else ""
+
     return render_template(
-        "qr_generator.html",
+        "qr_code.html",
         active_page="qr_generator",
         batches=all_batches,
         selected_batch_id=batch_id,
         qr_image=qr_image,
-        batch_info=batch_info
+        batch_info=batch_info,
+        trace_url=trace_url
     )
 
 
-# --- Track Honey (4-Stage Journey) ---
+# --- Track Honey (5-Stage Supply Chain Traceability) ---
 @app.route("/track-honey")
-@login_required
+@app.route("/traceability")
 def track_honey():
     all_batches = database.get_all_batches()
     batch_id = request.args.get("batch_id", "").strip().upper()
@@ -1010,13 +1018,29 @@ def track_honey():
         batch_id = all_batches[0]["batch_id"]
 
     batch = database.get_batch(batch_id) if batch_id else None
+    blocks_for_batch = [b for b in honey_blockchain.chain if b.data.get("batch_id") == batch_id]
+    is_valid, validation_msg = honey_blockchain.is_chain_valid()
+
     return render_template(
-        "track_honey.html",
+        "traceability.html",
         active_page="track_honey",
         batch=batch,
         active_batch_id=batch_id,
-        batches=all_batches
+        batches=all_batches,
+        blocks=blocks_for_batch,
+        is_chain_valid=is_valid,
+        validation_msg=validation_msg
     )
+
+
+@app.route("/traceability_view")
+def traceability():
+    return track_honey()
+
+
+@app.route("/qr_code_hub")
+def qr_code_hub():
+    return qr_generator()
 
 
 # --- Product Verification (Publicly accessible!) ---

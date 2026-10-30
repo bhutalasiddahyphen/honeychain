@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/honey-logo.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
 </head>
 <body class="auth-body">
 
@@ -104,12 +105,7 @@
 
         <!-- Password with Show/Hide toggle -->
         <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label for="password" style="margin-bottom: 0;">Password</label>
-            <a href="javascript:void(0)" onclick="openForgotPasswordPrompt()" style="font-size: 0.78rem; color: var(--hc-text-muted); text-decoration: none;">
-              Forgot?
-            </a>
-          </div>
+          <label for="password">Password</label>
           <div class="auth-input-wrapper">
             <i class="fa-solid fa-lock prefix-icon"></i>
             <input 
@@ -126,6 +122,17 @@
               <i class="fa-solid fa-eye"></i>
             </button>
           </div>
+        </div>
+
+        <!-- Remember Me and Forgot Password Options -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--hc-text-secondary); cursor: pointer; margin-bottom: 0;">
+            <input type="checkbox" name="remember_me" value="1" checked style="width: 16px; height: 16px; accent-color: var(--hc-amber); cursor: pointer;">
+            <span>Remember me</span>
+          </label>
+          <a href="javascript:void(0)" onclick="openForgotPasswordPrompt()" style="font-size: 0.82rem; color: var(--hc-amber-dark); font-weight: 600; text-decoration: none;">
+            Forgot password?
+          </a>
         </div>
 
         <!-- Submit Button -->

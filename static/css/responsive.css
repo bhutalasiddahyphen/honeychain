@@ -1,0 +1,445 @@
+/* ==========================================================================
+   HONEY CHAIN - Master Responsive Design Stylesheet (responsive.css)
+   Target Viewports:
+     - Desktop Computers: 1920 × 1080
+     - Laptops:           1366 × 768
+     - Tablets & iPads:   768 × 1024
+     - Mobile / iPhones:  390 × 844
+     - Small Mobile:      360 × 640
+
+   Brand Colors:
+     - Golden Amber:      #F59E0B, #D97706, #FEF3C7
+     - Deep Honey Brown:  #4A2C16, #2D1A0D, #1C100A
+     - Soft Cream:        #FFFDF8, #FBF7EE
+     - Pure White:        #FFFFFF
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Universal Fluid & Box Reset
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden !important;
+  width: 100%;
+  min-height: 100vh;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   2. Touch-Friendly Elements & Accessibility (Min 44px target)
+   -------------------------------------------------------------------------- */
+button, 
+.btn-primary, 
+.btn-secondary, 
+.btn-menu-action, 
+.nav-item, 
+.auth-btn-primary,
+.mobile-hamburger,
+.form-input,
+.auth-input,
+select,
+.btn-sm {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* --------------------------------------------------------------------------
+   3. DESKTOP & LARGE LAPTOP (>= 1025px: 1366×768 to 1920×1080)
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 1025px) {
+  /* Visible Left Sidebar */
+  .sidebar {
+    width: 270px !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 1000;
+    box-shadow: 2px 0 16px rgba(45, 26, 13, 0.08);
+  }
+
+  .main-wrapper {
+    margin-left: 270px !important;
+    min-height: 100vh;
+    width: calc(100% - 270px);
+    transition: margin-left 0.25s ease, width 0.25s ease;
+  }
+
+  /* When sidebar is collapsed */
+  .sidebar.closed {
+    transform: translateX(-270px) !important;
+  }
+
+  .main-wrapper.sidebar-closed {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Hide Mobile Header on Desktop */
+  .mobile-topbar {
+    display: none !important;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  /* Desktop Multi-column Layouts */
+  .stats-row, 
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 18px !important;
+  }
+
+  .pipeline-grid,
+  .pipeline-steps-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .form-row,
+  .two-col-layout {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+  }
+
+  .card-with-sidebar {
+    display: grid !important;
+    grid-template-columns: 1fr 2fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. TABLETS & IPADS (768px to 1024px: e.g. 768×1024, 800×1280)
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  /* Collapsible / Drawer-ready Sidebar */
+  .sidebar {
+    width: 260px !important;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.mobile-open,
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-overlay.active {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .mobile-topbar {
+    display: flex !important;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+  }
+
+  /* Medium-sized Dashboard Cards: 3x2 grid */
+  .stats-row,
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  /* 4 Steps in 2x2 grid on Tablet */
+  .pipeline-grid,
+  .pipeline-steps-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .card-with-sidebar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  /* Tables with smooth touch scroll */
+  .table-responsive,
+  .data-table-container {
+    width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+  }
+
+  table.data-table {
+    min-width: 680px;
+  }
+
+  .content-body,
+  .clean-dashboard,
+  .dashboard-container {
+    padding: 20px 16px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. MOBILE PHONES & IPHONES (< 768px: e.g. 390×844, 360×640)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 767px) {
+  /* Complete Zero Horizontal Overflow */
+  html, body {
+    overflow-x: hidden !important;
+    position: relative;
+    width: 100%;
+  }
+
+  /* Off-canvas Sliding Drawer Sidebar */
+  .sidebar {
+    width: 82% !important;
+    max-width: 320px !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .sidebar.mobile-open,
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  /* Backdrop Overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+    transition: opacity 0.25s ease;
+  }
+
+  .sidebar-overlay.active {
+    display: block !important;
+  }
+
+  /* Mobile App Header Bar */
+  .mobile-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    height: 58px;
+    padding: 0 16px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-hamburger {
+    background: none;
+    border: none;
+    font-size: 1.35rem;
+    color: #1F2937;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+  }
+
+  .mobile-hamburger:active {
+    background: #F3F4F6;
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .mobile-brand img {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Desktop Topbar is Hidden on Mobile */
+  .main-topbar {
+    display: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 30px;
+  }
+
+  .content-body,
+  .clean-dashboard,
+  .dashboard-container {
+    padding: 16px 12px !important;
+  }
+
+  /* Telemetry Cards: Stacked Vertically or in 2-Col for Quick Glance */
+  .stats-row,
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .stat-card {
+    padding: 14px 12px !important;
+  }
+
+  .stat-card .stat-value {
+    font-size: 1.4rem !important;
+  }
+
+  /* 4-Stage Supply Chain Pipeline: Stacked on Mobile */
+  .pipeline-grid,
+  .pipeline-steps-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Form Layouts: Full Width */
+  .form-row,
+  .two-col-layout,
+  .card-with-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  .form-input,
+  .auth-input,
+  select,
+  textarea {
+    width: 100% !important;
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+  }
+
+  /* Buttons Full-Width on Mobile */
+  .btn-primary,
+  .btn-secondary,
+  .auth-btn-primary {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px 18px !important;
+  }
+
+  /* Table Mobile Card View / Touch Scroll */
+  .table-responsive,
+  .data-table-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  table.data-table {
+    min-width: 580px;
+    font-size: 0.82rem;
+  }
+
+  table.data-table th,
+  table.data-table td {
+    padding: 10px 10px !important;
+  }
+
+  /* Mobile QR Camera Viewport */
+  #qrVideo {
+    max-height: 280px !important;
+  }
+
+  #scanOverlay {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  /* Typography Scaling */
+  h1 { font-size: 1.45rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.1rem !important; }
+  p { font-size: 0.9rem !important; }
+
+  /* Login Card Full Width Padding */
+  .auth-container {
+    padding: 12px 6px !important;
+  }
+
+  .auth-card {
+    padding: 24px 18px !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. SMALL MOBILE (<= 360px: e.g. 360×640 Galaxy S8, iPhone SE)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 360px) {
+  .stats-row,
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-title {
+    font-size: 1.3rem !important;
+  }
+
+  .btn-google {
+    font-size: 0.85rem !important;
+    padding: 9px 12px !important;
+  }
+}

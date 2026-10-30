@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/honeychain-logo.png') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
 </head>
 <body>
 
@@ -46,7 +47,7 @@
         </button>
       </div>
 
-      <!-- Navigation Menu: 15 Options with Golden Yellow Icons -->
+      <!-- Navigation Menu: Section 5 Standard -->
       <nav class="sidebar-nav">
         <!-- 1. Dashboard -->
         <a href="{{ url_for('dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" title="Dashboard">
@@ -54,34 +55,34 @@
           <span>Dashboard</span>
         </a>
 
-        <!-- 2. Beekeeper Management (Step 1) -->
-        <a href="{{ url_for('beekeeper') }}" class="nav-item {% if active_page == 'beekeeper' %}active{% endif %}" title="Step 1: Beekeeper Management">
+        <!-- 2. Beekeeper -->
+        <a href="{{ url_for('beekeeper') }}" class="nav-item {% if active_page == 'beekeeper' %}active{% endif %}" title="Beekeeper">
           <i class="fa-solid fa-seedling"></i>
-          <span>Beekeeper Management</span>
+          <span>Beekeeper</span>
         </a>
 
-        <!-- 3. Honey Batch Management (Step 2) -->
-        <a href="{{ url_for('batches') }}" class="nav-item {% if active_page == 'batches' %}active{% endif %}" title="Step 2: Honey Batch Management">
+        <!-- 3. Laboratory -->
+        <a href="{{ url_for('laboratory') }}" class="nav-item {% if active_page == 'laboratory' %}active{% endif %}" title="Laboratory">
+          <i class="fa-solid fa-flask-vial"></i>
+          <span>Laboratory</span>
+        </a>
+
+        <!-- 4. Packer -->
+        <a href="{{ url_for('packer') }}" class="nav-item {% if active_page == 'packer' %}active{% endif %}" title="Packer">
+          <i class="fa-solid fa-box-open"></i>
+          <span>Packer</span>
+        </a>
+
+        <!-- 5. Seller -->
+        <a href="{{ url_for('seller') }}" class="nav-item {% if active_page == 'seller' %}active{% endif %}" title="Seller">
+          <i class="fa-solid fa-shop"></i>
+          <span>Seller</span>
+        </a>
+
+        <!-- 6. Honey Batch Management -->
+        <a href="{{ url_for('batches') }}" class="nav-item {% if active_page == 'batches' %}active{% endif %}" title="Honey Batch Management">
           <i class="fa-solid fa-boxes-stacked"></i>
           <span>Honey Batch Management</span>
-        </a>
-
-        <!-- 4. Laboratory Testing (Step 3) -->
-        <a href="{{ url_for('laboratory') }}" class="nav-item {% if active_page == 'laboratory' %}active{% endif %}" title="Step 3: Laboratory Testing">
-          <i class="fa-solid fa-flask-vial"></i>
-          <span>Laboratory Testing</span>
-        </a>
-
-        <!-- 5. Packer Management (Step 4) -->
-        <a href="{{ url_for('packer') }}" class="nav-item {% if active_page == 'packer' %}active{% endif %}" title="Step 4: Packer Management">
-          <i class="fa-solid fa-box-open"></i>
-          <span>Packer Management</span>
-        </a>
-
-        <!-- 6. Seller Management (Step 5) -->
-        <a href="{{ url_for('seller') }}" class="nav-item {% if active_page == 'seller' %}active{% endif %}" title="Step 5: Seller Management">
-          <i class="fa-solid fa-shop"></i>
-          <span>Seller Management</span>
         </a>
 
         <!-- 7. Blockchain Records -->
@@ -90,28 +91,22 @@
           <span>Blockchain Records</span>
         </a>
 
-        <!-- 8. QR Code Generator -->
-        <a href="{{ url_for('qr_generator') }}" class="nav-item {% if active_page == 'qr_generator' %}active{% endif %}" title="QR Code Generator">
+        <!-- 8. QR Code Generation -->
+        <a href="{{ url_for('qr_generator') }}" class="nav-item {% if active_page == 'qr_generator' %}active{% endif %}" title="QR Code Generation">
           <i class="fa-solid fa-qrcode"></i>
-          <span>QR Code Generator</span>
+          <span>QR Code Generation</span>
         </a>
 
-        <!-- 8b. Scan QR Code -->
-        <a href="{{ url_for('qr_scan') }}" class="nav-item {% if active_page == 'qr_scan' %}active{% endif %}" title="Scan QR Code with Camera">
+        <!-- 9. QR Code Verification -->
+        <a href="{{ url_for('qr_scan') }}" class="nav-item {% if active_page == 'qr_scan' %}active{% endif %}" title="QR Code Verification">
           <i class="fa-solid fa-camera"></i>
-          <span>Scan QR Code</span>
+          <span>QR Code Verification</span>
         </a>
 
-        <!-- 9. Track Honey -->
-        <a href="{{ url_for('track_honey') }}" class="nav-item {% if active_page == 'track_honey' %}active{% endif %}" title="Track Honey">
+        <!-- 10. Traceability -->
+        <a href="{{ url_for('track_honey') }}" class="nav-item {% if active_page == 'track_honey' %}active{% endif %}" title="Traceability">
           <i class="fa-solid fa-route"></i>
-          <span>Track Honey</span>
-        </a>
-
-        <!-- 10. Product Verification -->
-        <a href="{{ url_for('verification') }}" class="nav-item {% if active_page == 'verification' %}active{% endif %}" title="Product Verification">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span>Product Verification</span>
+          <span>Traceability</span>
         </a>
 
         <!-- 11. Reports -->
@@ -120,25 +115,13 @@
           <span>Reports</span>
         </a>
 
-        <!-- 12. Notifications -->
-        <a href="{{ url_for('notifications_page') }}" class="nav-item {% if active_page == 'notifications' %}active{% endif %}" title="Notifications">
-          <i class="fa-solid fa-bell"></i>
-          <span>Notifications</span>
-        </a>
-
-        <!-- 13. User Profile -->
-        <a href="{{ url_for('profile') }}" class="nav-item {% if active_page == 'profile' %}active{% endif %}" title="User Profile">
-          <i class="fa-solid fa-circle-user"></i>
-          <span>User Profile</span>
-        </a>
-
-        <!-- 14. Settings -->
+        <!-- 12. Settings -->
         <a href="{{ url_for('settings_page') }}" class="nav-item {% if active_page == 'settings' %}active{% endif %}" title="Settings">
           <i class="fa-solid fa-sliders"></i>
           <span>Settings</span>
         </a>
 
-        <!-- 15. Logout -->
+        <!-- 13. Logout -->
         <a href="{{ url_for('logout') }}" class="nav-item nav-item-logout" title="Logout">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Logout</span>
